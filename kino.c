@@ -101,7 +101,7 @@ int main()
     SetConsoleCP(65001);
     SetConsoleOutputCP(65001);
 
-    FILE* films = fopen("C:\\Users\\Ilya\\Desktop\\ch\\proga\\kino\\films.txt", "r");
+    FILE* films = fopen("films.txt", "r");
     struct film f1, f2;
     f1 = scanfFilm(films);
     f2 = scanfFilm(films);
@@ -133,7 +133,7 @@ int main()
     }
     fclose(films);
 
-    int currWindow = 0;
+    int currWindow = 2;
     while(TRUE)
     {
         // Окно входа в систему
