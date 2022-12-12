@@ -101,7 +101,7 @@ int main()
     SetConsoleCP(65001);
     SetConsoleOutputCP(65001);
 
-    FILE* films = fopen("C:/Users/Ilya/Desktop/ch/c c++/films.txt", "r");
+    FILE* films = fopen("films.txt", "r");
     struct film f1, f2;
     f1 = scanfFilm(films);
     f2 = scanfFilm(films);
@@ -133,21 +133,62 @@ int main()
     }
     fclose(films);
 
+    int currWindow = 2;
     while(TRUE)
     {
-        if (GetAsyncKeyState(VK_RIGHT) != 0)
+        // Окно входа в систему
+        if (currWindow == 0)
         {
-            libraryCurr++;
-            system("cls");
-            Sleep(200);
-            printCards(library, libraryCurr);
+            
         }
-        if (GetAsyncKeyState(VK_LEFT) != 0)
+
+        // Окно регистрации
+        if (currWindow == 1)
         {
-            libraryCurr--;
-            system("cls");
-            Sleep(200);
-            printCards(library, libraryCurr);
+
+        }
+
+        // Каталог
+        if (currWindow == 2)
+        {
+            if (GetAsyncKeyState(VK_RIGHT) != 0)
+            {
+                libraryCurr++;
+                system("cls");
+                Sleep(200);
+                printCards(library, libraryCurr);
+            }
+            if (GetAsyncKeyState(VK_LEFT) != 0)
+            {
+                libraryCurr--;
+                system("cls");
+                Sleep(200);
+                printCards(library, libraryCurr);
+            }
+        }
+
+        // Избранное
+        if (currWindow == 3)
+        {
+
+        }
+
+        // Подробная информация о фильме
+        if (currWindow == 4)
+        {
+
+        }
+
+        // Личный кабинет
+        if (currWindow == 5)
+        {
+
+        }
+
+        // Добавление фильма в каталог
+        if (currWindow == 6)
+        {
+            
         }
     }
 
