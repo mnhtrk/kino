@@ -3,7 +3,7 @@
 #include <string.h>
 #include <windows.h>
 #include <math.h>
-
+//fdfdsfdsf
 struct film
 {
     char name[100];
@@ -11,7 +11,7 @@ struct film
     char country[100];
     char genre[100];
     char rating[5];
-};
+};//
 
 struct node
 {
