@@ -246,7 +246,7 @@ int main()
         // Окно регистрации
         if (currWindow == 1)
         {
-            FILE* users = fopen("users.txt", "aw");
+            FILE* users = fopen("bin/users.txt", "aw");
             int isRightInput = 0;
             while (isRightInput == 0)
             {
@@ -340,7 +340,11 @@ int main()
         // Личный кабинет
         if (currWindow == 5)
         {
-
+            system("cls");
+            printf("Ваш профиль\n\n");
+            printf("Юзернейм: %s\n", currUser.login);
+            printf("Пароль: %s\n","********");
+            printf("Номер карты: **** %lld\n\n",currUser.card%1000);
         }
 
         // Добавление фильма в каталог
