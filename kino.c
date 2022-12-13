@@ -91,23 +91,6 @@ void printCards(struct list l, int index)
     printf("Рейтинг %s\n", current->film.rating);
 }
 
-// Скан фильма из файла
-struct film scanfFilm(FILE* films)
-{
-    struct film f;
-    fgets(f.name, 100, films);
-    f.name[strcspn(f.name, "\n")] = 0;
-    fgets(f.year, 100, films);
-    f.year[strcspn(f.year, "\n")] = 0;
-    fgets(f.country, 100, films);
-    f.country[strcspn(f.country, "\n")] = 0;
-    fgets(f.genre, 100, films);
-    f.genre[strcspn(f.genre, "\n")] = 0;
-    fgets(f.rating, 100, films);
-    f.rating[strcspn(f.rating, "\n")] = 0;
-    return f;
-}
-
 // Функция для вычисления количества цифр в числе
 int digits(long long n)
 {
