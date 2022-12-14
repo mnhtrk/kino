@@ -159,7 +159,6 @@ int main()
     int libraryCurr = 0;
     int currWindow = -1;
     int logReg = 0;
-    BYTE keyStatus[256];
     struct user newUser;
     struct user currUser;
     printf("-> Войти\n   Зарегистрироваться\n");
@@ -200,7 +199,6 @@ int main()
             {
                 return 0;
             }
-            SetKeyboardState(keyStatus);
         }
 
         // Окно входа в систему
@@ -240,7 +238,6 @@ int main()
                 system("cls");
                 printf("Неправильный логин или пароль\n");
             }
-            SetKeyboardState(keyStatus);
         }
 
         // Окно регистрации
@@ -252,14 +249,58 @@ int main()
             {
                 printf("Придумайте логин:\n");
                 scanf("%s", &newUser.login);
-                isRightInput = 1;
+                int isWrongLog = 0;
+                for (int i = 0; i < strlen(newUser.login); i++)
+                {
+                    if ((newUser.login[i] < 48 || newUser.login[i] > 57) && (newUser.login[i] < 65 || newUser.login[i] > 90) && (newUser.login[i] < 97 || newUser.login[i] > 122))
+                    {
+                        isWrongLog = 1;
+                    }
+                }
+                if (strlen(newUser.login) < 3 || strlen(newUser.login) > 20 || isWrongLog == 1)
+                {
+                    system("cls");
+                    printf("Логин должен быть от 3 до 20 символов и состоять только из букв латинского алфавита и цифр\n");
+                }
+                else
+                {
+                    isRightInput = 1;
+                }
             }
             isRightInput = 0;
             while (isRightInput == 0)
             {
+                int isHighReg = 0, isLowReg = 0, isNum = 0, isWrongPass = 0;;
                 printf("Придумайте пароль:\n");
                 scanf("%s", &newUser.pass);
-                isRightInput = 1;
+                for (int i = 0; i < strlen(newUser.pass); i++)
+                {
+                    if ((newUser.pass[i] < 48 || newUser.pass[i] > 57) && (newUser.pass[i] < 65 || newUser.pass[i] > 90) && (newUser.pass[i] < 97 || newUser.pass[i] > 122))
+                    {
+                        isWrongPass = 1;
+                    }
+                    if (newUser.pass[i] < 58 && newUser.pass[i] > 47)
+                    {
+                        isNum += 1;
+                    }
+                    if (newUser.pass[i] < 91 && newUser.pass[i] > 64)
+                    {
+                        isHighReg += 1;
+                    }
+                    if (newUser.pass[i] < 123 && newUser.pass[i] > 96)
+                    {
+                        isLowReg += 1;
+                    }
+                    if (isNum > 0 && isLowReg > 0 && isHighReg > 0 && strlen(newUser.pass) >= 6 && strlen(newUser.pass) <= 20 && isWrongPass == 0)
+                    {
+                        isRightInput = 1;
+                    }
+                }
+                if (isNum == 0 || isLowReg == 0 || isHighReg == 0 || strlen(newUser.pass) < 6 && strlen(newUser.pass) > 20 && isWrongPass == 1)
+                {
+                    system("cls");
+                    printf("Пароль должен содержать от 6 до 20 символов, хотя бы одну цифру и букву верхнего и нижнего регистра латинского алфавита\n");
+                }
             }
             isRightInput = 0;
             while(isRightInput == 0)
@@ -290,9 +331,8 @@ int main()
             }
             system("cls");
             Sleep(200);
-            printf("-> Войти:\n   Регистрация\n");
+            printf("-> Войти\n   Регистрация\n");
             currWindow = -1;
-            SetKeyboardState(keyStatus);
         }
 
         // Каталог
@@ -318,11 +358,10 @@ int main()
             {
                 system("cls");
                 Sleep(200);
-                printf("-> login:\n   registration\n");
+                printf("-> Войти\n   Зарегистрироваться\n");
                 currWindow = -1;
                 libraryCurr = 0;
             }
-            SetKeyboardState(keyStatus);
         }
 
         // Избранное
