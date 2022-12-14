@@ -84,11 +84,7 @@ void printCards(struct list l, int index)
         }
     }
 
-    printf("Название %s\n", current->film.name);
-    printf("Год %s\n", current->film.year);
-    printf("Страна %s\n", current->film.country);
-    printf("Жанр %s\n", current->film.genre);
-    printf("Рейтинг %s\n", current->film.rating);
+    printf("%s   |%s|   %s\n", current->prev->film.name, current->film.name, current->next->film.name);
 }
 
 // Функция для вычисления количества цифр в числе
@@ -202,7 +198,7 @@ int main()
         }
 
         // Окно входа в систему
-        if (currWindow == 0)
+        if (currWindow == 0 && GetAsyncKeyState(VK_RETURN) == 0)
         {
             char inputLog[20];
             char inputPass[20];
@@ -241,7 +237,7 @@ int main()
         }
 
         // Окно регистрации
-        if (currWindow == 1)
+        if (currWindow == 1 && GetAsyncKeyState(VK_RETURN) == 0)
         {
             FILE* users = fopen("users.txt", "aw");
             int isRightInput = 0;
@@ -336,7 +332,7 @@ int main()
         }
 
         // Каталог
-        if (currWindow == 2)
+        if (currWindow == 2 && GetAsyncKeyState(VK_RETURN) == 0)
         {
             if (GetAsyncKeyState(VK_RIGHT) != 0)
             {
@@ -353,6 +349,32 @@ int main()
                 Sleep(200);
                 printf("Добро пожаловать, %s\n\n", currUser.login);
                 printCards(library, libraryCurr);
+            }
+            if (GetAsyncKeyState(VK_RETURN) != 0)
+            {
+                system("cls");
+                Sleep(200);
+                struct node* current = library.head;
+                if (libraryCurr > 0)
+                {
+                    for (int i = 0; i < libraryCurr; i++)
+                    {
+                        current = current->next;
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i > libraryCurr; i--)
+                    {
+                        current = current->prev;
+                    }
+                }
+                printf("Название %s\n", current->film.name);
+                printf("Год %s\n", current->film.year);
+                printf("Страна %s\n", current->film.country);
+                printf("Жанр %s\n", current->film.genre);
+                printf("Рейтинг %s\n", current->film.rating);
+                currWindow = 4;
             }
             if (GetAsyncKeyState(VK_ESCAPE) != 0)
             {
@@ -371,9 +393,16 @@ int main()
         }
 
         // Подробная информация о фильме
-        if (currWindow == 4)
+        if (currWindow == 4 && GetAsyncKeyState(VK_RETURN) == 0)
         {
-
+            if (GetAsyncKeyState(VK_ESCAPE) != 0)
+            {
+                system("cls");
+                Sleep(200);
+                printf("Добро пожаловать, %s\n\n", currUser.login);
+                printCards(library, libraryCurr);
+                currWindow = 2;
+            }
         }
 
         // Личный кабинет
