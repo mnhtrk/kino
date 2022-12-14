@@ -157,11 +157,13 @@ int main()
     fclose(films);
 
     int libraryCurr = 0;
-    int currWindow = -1;
+    int currWindow = -1; //!!поменять обратно на -1, 5 поставлено для теста ЛК
     int logReg = 0;
     BYTE keyStatus[256];
     struct user newUser;
     struct user currUser;
+    short showPass = 0;
+    short showCard = 0;
     printf("-> Войти\n   Зарегистрироваться\n");
     while(TRUE)
     {
@@ -246,7 +248,7 @@ int main()
         // Окно регистрации
         if (currWindow == 1)
         {
-            FILE* users = fopen("bin/users.txt", "aw");
+            FILE* users = fopen("users.txt", "aw");
             int isRightInput = 0;
             while (isRightInput == 0)
             {
@@ -322,6 +324,10 @@ int main()
                 currWindow = -1;
                 libraryCurr = 0;
             }
+            if (GetAsyncKeyState(VK_DOWN) != 0)
+            {
+                currWindow=5;
+            }
             SetKeyboardState(keyStatus);
         }
 
@@ -340,11 +346,120 @@ int main()
         // Личный кабинет
         if (currWindow == 5)
         {
+            int choice;
             system("cls");
             printf("Ваш профиль\n\n");
             printf("Юзернейм: %s\n", currUser.login);
-            printf("Пароль: %s\n","********");
-            printf("Номер карты: **** %lld\n\n",currUser.card%1000);
+            printf("Пароль: ");
+            if(showPass==0)
+            {
+                for(int i = 0; i<sizeof(currUser.pass);i++)
+                {
+                    if(currUser.pass[i]=='\0')
+                    {
+                        break;
+                    }
+                    printf("*");
+
+                }
+                printf("\n");
+            }
+            else
+            {
+                printf("%s",currUser.pass);
+            }
+
+            if(showCard==0)
+            {
+                printf("Номер карты: **** %lld\n\n",currUser.card%10000);
+            }
+            else
+            {
+                printf("Номер карты: %lld\n\n",currUser.card);
+            }
+            printf("1) Показать пароль\n");
+            printf("2) Показать номер карты\n");
+            printf("3) Сменить номер карты\n");
+            printf("4) Поменять имя\n");
+            printf("5) Изменить пароль\n\n");
+            printf("6) Выйти в каталог\n\n");
+            printf("Выбор: ");scanf("%d",&choice);
+            
+            switch (choice)
+            {
+            case 1:
+                if (showPass == 0)
+                {
+                    showPass = 1;
+                }
+                else
+                {
+                    showPass = 0;
+                }
+                break;
+            
+            case 2:
+                if (showCard == 0)
+                {
+                    showCard = 1;
+                }
+                else
+                {
+                    showCard = 0;
+                }
+                break;
+            
+            case 3:
+                /* code */
+                break;
+            
+            case 4:
+                /* code */
+                break;
+
+            case 5:
+                system("cls");
+                char passhold[20];
+                printf("Введите старый пароль: ");scanf("%s",passhold);
+                short cond=1;
+                for(int i = 0; i<20;i++)
+                {
+                    if(currUser.pass[i]=='\0' || currUser.pass[i]=='\n')
+                    {
+                        break;
+                    }
+                    if(passhold[i]!=currUser.pass[i])
+                    {
+                        cond=0;
+                    }
+                }
+                if(cond==0)
+                {
+                    system("cls");
+                    printf("Неверный старый пароль, повторите попытку снова");
+                    sleep(3);
+                }
+                else
+                {
+                    printf("\nВведите новый пароль (не более 20 символов): ");
+                    if(sizeof(gets(currUser.pass))<20)
+                    {
+                        system("cls");
+                        printf("Неверно набранная строка, повторите попытку снова");
+                        sleep(3);
+                    }
+                }
+                break;
+
+            case 6:
+                currWindow = 2;
+                break;
+
+            default:
+                break;
+            }
+
+
         }
 
         // Добавление фильма в каталог
