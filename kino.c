@@ -154,14 +154,14 @@ int main()
 
     int libraryCurr = 0;
     int currWindow = -1;
-    int logReg = 0;
+    int logReg = 0, addDel = 0;
     struct user newUser;
     struct user currUser;
     printf("-> Войти\n   Зарегистрироваться\n");
     while(TRUE)
     {
         // Стартовое окно
-        if (currWindow == -1 && GetAsyncKeyState(VK_RETURN) == 0)
+        if (currWindow == -1 && GetAsyncKeyState(VK_RETURN) == 0 && GetAsyncKeyState(VK_ESCAPE) == 0)
         {
             if (GetAsyncKeyState(VK_UP) != 0)
             {
@@ -198,7 +198,7 @@ int main()
         }
 
         // Окно входа в систему
-        if (currWindow == 0 && GetAsyncKeyState(VK_RETURN) == 0)
+        if (currWindow == 0)
         {
             char inputLog[20];
             char inputPass[20];
@@ -219,7 +219,12 @@ int main()
                     fscanf(users, "%d", &currUser.isAdmin);
                     currWindow = 2;
                     system("cls");
-                    printf("Добро пожаловать, %s\n\n", currUser.login);
+                    printf("Добро пожаловать, %s ", currUser.login);
+                    if (currUser.isAdmin == 1)
+                    {
+                        printf("(Администратор)");
+                    }
+                    printf("\n\n");
                     printCards(library, libraryCurr);
                     break;
                 }
@@ -237,7 +242,7 @@ int main()
         }
 
         // Окно регистрации
-        if (currWindow == 1 && GetAsyncKeyState(VK_RETURN) == 0)
+        if (currWindow == 1 && GetAsyncKeyState(VK_ESCAPE) == 0)
         {
             FILE* users = fopen("users.txt", "aw");
             int isRightInput = 0;
@@ -332,14 +337,19 @@ int main()
         }
 
         // Каталог
-        if (currWindow == 2 && GetAsyncKeyState(VK_RETURN) == 0)
+        if (currWindow == 2 && GetAsyncKeyState(VK_RETURN) == 0 && GetAsyncKeyState(VK_DOWN) == 0 && GetAsyncKeyState(VK_ESCAPE) == 0)
         {
             if (GetAsyncKeyState(VK_RIGHT) != 0)
             {
                 libraryCurr++;
                 system("cls");
                 Sleep(200);
-                printf("Добро пожаловать, %s\n\n", currUser.login);
+                printf("Добро пожаловать, %s ", currUser.login);
+                if (currUser.isAdmin == 1)
+                {
+                    printf("(Администратор)");
+                }
+                printf("\n\n");
                 printCards(library, libraryCurr);
             }
             if (GetAsyncKeyState(VK_LEFT) != 0)
@@ -347,7 +357,12 @@ int main()
                 libraryCurr--;
                 system("cls");
                 Sleep(200);
-                printf("Добро пожаловать, %s\n\n", currUser.login);
+                printf("Добро пожаловать, %s ", currUser.login);
+                if (currUser.isAdmin == 1)
+                {
+                    printf("(Администратор)");
+                }
+                printf("\n\n");
                 printCards(library, libraryCurr);
             }
             if (GetAsyncKeyState(VK_RETURN) != 0)
@@ -384,6 +399,12 @@ int main()
                 currWindow = -1;
                 libraryCurr = 0;
             }
+            if (currUser.isAdmin == 1 && GetAsyncKeyState(VK_DOWN) != 0)
+            {
+                system("cls");
+                Sleep(200);
+                currWindow = 6;
+            }
         }
 
         // Избранное
@@ -393,13 +414,18 @@ int main()
         }
 
         // Подробная информация о фильме
-        if (currWindow == 4 && GetAsyncKeyState(VK_RETURN) == 0)
+        if (currWindow == 4 && GetAsyncKeyState(VK_ESCAPE) == 0)
         {
             if (GetAsyncKeyState(VK_ESCAPE) != 0)
             {
                 system("cls");
                 Sleep(200);
-                printf("Добро пожаловать, %s\n\n", currUser.login);
+                printf("Добро пожаловать, %s ", currUser.login);
+                if (currUser.isAdmin == 1)
+                {
+                    printf("(Администратор)");
+                }
+                printf("\n\n");
                 printCards(library, libraryCurr);
                 currWindow = 2;
             }
@@ -412,9 +438,42 @@ int main()
         }
 
         // Добавление фильма в каталог
-        if (currWindow == 6)
+        if (currWindow == 6 && GetAsyncKeyState(VK_ESCAPE) == 0)
         {
-            
+            printf("Добавление фильма в каталог\n\n");
+            struct film newFilm;
+            FILE* films = fopen("films.txt", "aw");
+            printf("Название: ");
+            scanf("%s", &newFilm.name);
+            printf("Год: ");
+            scanf("%s", &newFilm.year);
+            printf("Страна: ");
+            scanf("%s", &newFilm.country);
+            printf("Жанр: ");
+            scanf("%s", &newFilm.genre);
+            printf("Рейтинг: ");
+            scanf("%s", &newFilm.rating);
+            fprintf(films, "\n%s", newFilm.name);
+            fprintf(films, "\n%s", newFilm.year);
+            fprintf(films, "\n%s", newFilm.country);
+            fprintf(films, "\n%s", newFilm.genre);
+            fprintf(films, "\n%s", newFilm.rating);
+            fclose(films);
+            push(&library, newFilm);
+            printf("Фильм добавлен в каталог %s\n", newFilm.name);
+            while (GetAsyncKeyState(VK_ESCAPE) == 0)
+            {
+            }
+            system("cls");
+            Sleep(200);
+            printf("Добро пожаловать, %s ", currUser.login);
+            if (currUser.isAdmin == 1)
+            {
+                printf("(Администратор)");
+            }
+            printf("\n\n");
+            printCards(library, libraryCurr);
+            currWindow = 2;
         }
     }
 
