@@ -426,7 +426,7 @@ int main()
                 }
                 break;
             
-            case 3:
+            case 3: //смена карты
                 long long cardtemp; 
                 system("cls");
                 printf("Введите новый номер карты: ");
@@ -451,7 +451,7 @@ int main()
                     if(cond==0)
                     {
                         system("cls");
-                        printf("Неверный старый пароль, повторите попытку снова");
+                        printf("Неверный пароль, повторите попытку снова");
                         Sleep(3000);
                     }
                     currUser.card=cardtemp;
@@ -460,7 +460,7 @@ int main()
                 }
                 break;
             
-            case 4:
+            case 4: //смена имени
                 system("cls");
                 char namehold[21];
                 printf("Введите новое имя: ");scanf("%s",namehold);
@@ -476,15 +476,23 @@ int main()
                             cond=0;
                         }
                     }
+
                     if(cond==0)
                     {
                         system("cls");
-                        printf("Неверный старый пароль, повторите попытку снова");
+                        printf("Неверный пароль, повторите попытку снова");
                         Sleep(3000);
                     }
-                    currUser.card=cardtemp;
-                    printf("\nУспешная смена имени!");
-                    Sleep(3000);
+                    else
+                    {
+                        for(int i = 0; i<strlen(namehold);i++)
+                        {
+                            currUser.pass[i]=namehold[i];
+                            currUser.pass[i+1]='\0';
+                        }
+                        printf("\nУспешная смена имени!");
+                        Sleep(3000);
+                    }
                 }
                 else
                 {
@@ -494,7 +502,7 @@ int main()
                 }
                 break;
 
-            case 5:
+            case 5: //смена пароля
                 system("cls");
                 char passhold[21];
                 char passhold1[21];
@@ -537,6 +545,7 @@ int main()
                 break;
 
             case 6:
+                //должен быть код с записью новых данных в файл
                 currWindow = 2;
                 break;
 
