@@ -366,7 +366,7 @@ int main()
             }
             else
             {
-                printf("%s",currUser.pass);
+                printf("%s\n",currUser.pass);
             }
 
             if(showCard==0)
@@ -377,8 +377,25 @@ int main()
             {
                 printf("Номер карты: %lld\n\n",currUser.card);
             }
-            printf("1) Показать пароль\n");
-            printf("2) Показать номер карты\n");
+
+            if(showPass==0)
+            {
+                printf("1) Показать пароль\n");
+            }
+            else
+            {
+                printf("1) Скрыть пароль\n");
+            }
+
+            if(showCard==0)
+            {
+                printf("2) Показать номер карты\n");
+            }
+            else
+            {
+                printf("2) Скрыть номер карты\n");
+            }
+            
             printf("3) Сменить номер карты\n");
             printf("4) Поменять имя\n");
             printf("5) Изменить пароль\n\n");
@@ -410,24 +427,81 @@ int main()
                 break;
             
             case 3:
-                /* code */
+                long long cardtemp; 
+                system("cls");
+                printf("Введите новый номер карты: ");
+                scanf("%lld",&cardtemp);
+                if(digits(cardtemp) != 16){
+                    system("cls");
+                    printf("Неверный номер карты, повторите попытку снова");
+                    Sleep(3000);
+                }
+                else
+                {
+                    char passhold[20];
+                    printf("Введите пароль: ");scanf("%s",passhold);
+                    short cond=1;
+                    for(int i = 0; i<strlen(currUser.pass);i++)
+                    {
+                        if(passhold[i]!=currUser.pass[i])
+                        {
+                            cond=0;
+                        }
+                    }
+                    if(cond==0)
+                    {
+                        system("cls");
+                        printf("Неверный старый пароль, повторите попытку снова");
+                        Sleep(3000);
+                    }
+                    currUser.card=cardtemp;
+                    printf("\nУспешная смена карты!");
+                    Sleep(3000);
+                }
                 break;
             
             case 4:
-                /* code */
+                system("cls");
+                char namehold[21];
+                printf("Введите новое имя: ");scanf("%s",namehold);
+                if(3<=strlen(namehold)<=20)
+                {
+                    char passhold[20];
+                    printf("Введите пароль: ");scanf("%s",passhold);
+                    short cond=1;
+                    for(int i = 0; i<strlen(currUser.pass);i++)
+                    {
+                        if(passhold[i]!=currUser.pass[i])
+                        {
+                            cond=0;
+                        }
+                    }
+                    if(cond==0)
+                    {
+                        system("cls");
+                        printf("Неверный старый пароль, повторите попытку снова");
+                        Sleep(3000);
+                    }
+                    currUser.card=cardtemp;
+                    printf("\nУспешная смена имени!");
+                    Sleep(3000);
+                }
+                else
+                {
+                    system("cls");
+                    printf("Неверно введено имя, повторите попытку снова");
+                    Sleep(3000);
+                }
                 break;
 
             case 5:
                 system("cls");
-                char passhold[20];
+                char passhold[21];
+                char passhold1[21];
                 printf("Введите старый пароль: ");scanf("%s",passhold);
                 short cond=1;
-                for(int i = 0; i<20;i++)
+                for(int i = 0; i<strlen(currUser.pass);i++)
                 {
-                    if(currUser.pass[i]=='\0' || currUser.pass[i]=='\n')
-                    {
-                        break;
-                    }
                     if(passhold[i]!=currUser.pass[i])
                     {
                         cond=0;
@@ -437,16 +511,27 @@ int main()
                 {
                     system("cls");
                     printf("Неверный старый пароль, повторите попытку снова");
-                    sleep(3);
+                    Sleep(3000);
                 }
                 else
                 {
                     printf("\nВведите новый пароль (не более 20 символов): ");
-                    if(sizeof(gets(currUser.pass))<20)
+                    scanf("%s",passhold1);
+                    if(strlen(passhold1)>20)
                     {
                         system("cls");
                         printf("Неверно набранная строка, повторите попытку снова");
-                        sleep(3);
+                        Sleep(3000);
+                    }
+                    else
+                    {
+                        for(int i = 0; i<strlen(passhold1);i++)
+                        {
+                            currUser.pass[i]=passhold1[i];
+                            currUser.pass[i+1]='\0';
+                        }
+                        printf("\nУдачная смена пароля!");
+                        Sleep(3000);
                     }
                 }
                 break;
