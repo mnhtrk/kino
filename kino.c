@@ -588,7 +588,7 @@ int main()
             {
                 fseek(users,point,SEEK_SET);
 
-                fprintf(users, "\n%s\n", newUser.login);
+                fprintf(users, "%s\n", newUser.login);
                 fprintf(users, "%s\n", newUser.pass);
                 fprintf(users, "%lld\n", newUser.card);
                 fprintf(users, "%d\n", newUser.favSize);
