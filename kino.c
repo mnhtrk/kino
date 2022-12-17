@@ -103,6 +103,35 @@ int digits(long long n)
     return count;
 }
 
+int find_user_point(FILE* file, char* string, long point_id)
+{//ftell с поиском необходимой строки и возврата нужного указателя по пользователям
+    char bufer[128];
+
+    do
+    {
+        if(feof(file)!=0)
+        {
+            return feof(file);
+        }
+        for(int i = 0;i<strlen(bufer);i++)
+        {
+            bufer[i]=bufer[i];
+        }
+
+        for(int i = 0; i<4;i++)
+        {
+            fgets(bufer, 128, file);
+        }
+    }  while(fgets(bufer, 128, file) != string);
+
+    fseek(file, strlen(bufer)*(-1), SEEK_END);
+    
+    point_id = ftell(file);
+
+    return 0;
+
+}
+
 int main()
 {
     SetConsoleCP(65001);
@@ -399,8 +428,12 @@ int main()
             printf("3) Сменить номер карты\n");
             printf("4) Поменять имя\n");
             printf("5) Изменить пароль\n\n");
-            printf("6) Выйти в каталог\n\n");
+            printf("6) Выйти в каталог и сохранить данные\n\n");
             printf("Выбор: ");scanf("%d",&choice);
+            
+            char passhold[21];
+            char passhold1[20];
+            char namehold[21];
             
             switch (choice)
             {
@@ -438,7 +471,6 @@ int main()
                 }
                 else
                 {
-                    char passhold[20];
                     printf("Введите пароль: ");scanf("%s",passhold);
                     short cond=1;
                     for(int i = 0; i<strlen(currUser.pass);i++)
@@ -466,7 +498,6 @@ int main()
                 printf("Введите новое имя: ");scanf("%s",namehold);
                 if(3<=strlen(namehold)<=20)
                 {
-                    char passhold[20];
                     printf("Введите пароль: ");scanf("%s",passhold);
                     short cond=1;
                     for(int i = 0; i<strlen(currUser.pass);i++)
@@ -504,8 +535,6 @@ int main()
 
             case 5: //смена пароля
                 system("cls");
-                char passhold[21];
-                char passhold1[21];
                 printf("Введите старый пароль: ");scanf("%s",passhold);
                 short cond=1;
                 for(int i = 0; i<strlen(currUser.pass);i++)
@@ -545,7 +574,6 @@ int main()
                 break;
 
             case 6:
-                //должен быть код с записью новых данных в файл
                 currWindow = 2;
                 break;
 
@@ -553,7 +581,26 @@ int main()
                 break;
             }
 
+            FILE* users = fopen("users.txt", "r+");
+            long point;
+            
+            if(find_user_point(users,currUser.pass,point)!=0)
+            {
+                fseek(users,point,SEEK_SET);
 
+                fprintf(users, "\n%s\n", newUser.login);
+                fprintf(users, "%s\n", newUser.pass);
+                fprintf(users, "%lld\n", newUser.card);
+                fprintf(users, "%d\n", newUser.favSize);
+                fprintf(users, "%d", newUser.isAdmin);
+                fclose(users);
+            }
+            else
+            {
+                system("cls");
+                printf("Ошибка записи данных");
+                return 0;           
+            }
         }
 
         // Добавление фильма в каталог
