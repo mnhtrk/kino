@@ -4,6 +4,9 @@
 #include <windows.h>
 #include <math.h>
 
+#define USERS "users.txt"
+#define FILMS "films.txt"
+
 struct film
 {
     char name[100];
@@ -137,7 +140,7 @@ int main()
     SetConsoleCP(65001);
     SetConsoleOutputCP(65001);
 
-    FILE* films = fopen("films.txt", "r");
+    FILE* films = fopen(FILMS, "r");
     struct film f1, f2;
     fgets(f1.name, 100, films);
     f1.name[strcspn(f1.name, "\n")] = '\0';
@@ -243,7 +246,7 @@ int main()
             scanf("%s", &inputLog);
             printf("Пароль:\n");
             scanf("%s", &inputPass);
-            FILE* users = fopen("users.txt", "r");
+            FILE* users = fopen(USERS, "r");
             while(fgets(currUser.login, 100, users) != NULL)
             {
                 currUser.login[strcspn(currUser.login, "\n")] = 0;
@@ -277,7 +280,7 @@ int main()
         // Окно регистрации
         if (currWindow == 1)
         {
-            FILE* users = fopen("users.txt", "aw");
+            FILE* users = fopen(USERS, "aw");
             int isRightInput = 0;
             while (isRightInput == 0)
             {
@@ -581,7 +584,7 @@ int main()
                 break;
             }
 
-            FILE* users = fopen("users.txt", "r+");
+            FILE* users = fopen(USERS, "r+");
             long point;
             
             if(find_user_point(users,currUser.pass,point)!=0)
