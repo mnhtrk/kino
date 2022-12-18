@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <windows.h>
+#include <locale.h>
 #include <math.h>
 
 struct film
@@ -440,9 +441,9 @@ int main()
         // Добавление фильма в каталог
         if (currWindow == 6 && GetAsyncKeyState(VK_ESCAPE) == 0)
         {
+            FILE* films = fopen("films.txt", "aw");
             printf("Добавление фильма в каталог\n\n");
             struct film newFilm;
-            FILE* films = fopen("films.txt", "aw");
             printf("Название: ");
             scanf("%s", &newFilm.name);
             printf("Год: ");
@@ -460,7 +461,7 @@ int main()
             fprintf(films, "\n%s", newFilm.rating);
             fclose(films);
             push(&library, newFilm);
-            printf("Фильм добавлен в каталог %s\n", newFilm.name);
+            printf("Фильм добавлен в каталог\n");
             while (GetAsyncKeyState(VK_ESCAPE) == 0)
             {
             }
