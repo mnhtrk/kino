@@ -4,8 +4,8 @@
 #include <windows.h>
 #include <math.h>
 
-#define USERS "users.txt"
-#define FILMS "films.txt"
+#define USERS "bin\\users.txt"
+#define FILMS "bin\\films.txt"
 
 struct film
 {
