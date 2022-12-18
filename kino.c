@@ -36,7 +36,7 @@ struct user
     int isAdmin;
 };
 
-// Р”РѕР±Р°РІР»РµРЅРёРµ СЌР»РµРјРµРЅС‚Р°
+// Добавление элемента
 void push(struct list* l, struct film film)
 {
     struct node* current = (struct node*) malloc(sizeof(struct node));
@@ -48,7 +48,7 @@ void push(struct list* l, struct film film)
     l->head = current;
 }
 
-// РЈРґР°Р»РµРЅРёРµ СЌР»РµРјРµРЅС‚Р°
+// Удаление элемента
 void pop(struct list* l)
 {
     struct node* current = l->head->next;
@@ -57,7 +57,7 @@ void pop(struct list* l)
     l->head = current;
 }
 
-// Р’С‹РІРѕРґ РЅРµСЃРєРѕР»СЊРєРёС… РѕРґРёРЅР°РєРѕРІС‹С… СЃРёРјРІРѕР»РѕРІ
+// Вывод нескольких одинаковых символов
 void printElem(int count, char elem)
 {
     for (int i = 0; i < count; i++)
@@ -66,7 +66,7 @@ void printElem(int count, char elem)
     }
 }
 
-// РљР°СЂСѓСЃРµР»СЊ
+// Карусель
 void printCards(struct list l, int index)
 {
     struct node* current = l.head;
@@ -88,7 +88,7 @@ void printCards(struct list l, int index)
     printf("%s   |%s|   %s\n", current->prev->film.name, current->film.name, current->next->film.name);
 }
 
-// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РІС‹С‡РёСЃР»РµРЅРёСЏ РєРѕР»РёС‡РµСЃС‚РІР° С†РёС„СЂ РІ С‡РёСЃР»Рµ
+// Функция для вычисления количества цифр в числе
 int digits(long long n)
 {
     int count = 0;
@@ -102,8 +102,9 @@ int digits(long long n)
 
 int main()
 {
-    SetConsoleCP(65001);
-    SetConsoleOutputCP(65001);
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+    setlocale(LC_ALL, "Russian");
 
     FILE* films = fopen("films.txt", "r");
     struct film f1, f2;
@@ -154,33 +155,32 @@ int main()
     fclose(films);
 
     int libraryCurr = 0;
-    int currWindow = -1;
+    int currWindow = 6;
     int logReg = 0, addDel = 0;
     struct user newUser;
     struct user currUser;
-    printf("-> Р’РѕР№С‚Рё\n   Р—Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°С‚СЊСЃСЏ\n");
+    printf("-> Войти\n   Зарегистрироваться\n");
     while(TRUE)
     {
-        // РЎС‚Р°СЂС‚РѕРІРѕРµ РѕРєРЅРѕ
+        // Стартовое окно
         if (currWindow == -1 && GetAsyncKeyState(VK_RETURN) == 0 && GetAsyncKeyState(VK_ESCAPE) == 0)
         {
-            if (GetAsyncKeyState(VK_UP) != 0)
+            if (GetAsyncKeyState(VK_UP) & 1)
             {
                 system("cls");
                 Sleep(200);
-                printf("-> Р’РѕР№С‚Рё\n   Р—Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°С‚СЊСЃСЏ\n");
+                printf("-> Войти\n   Зарегистрироваться\n");
                 logReg = 0;
             }
-            if (GetAsyncKeyState(VK_DOWN) != 0)
+            if (GetAsyncKeyState(VK_DOWN) & 1)
             {
                 system("cls");
                 Sleep(200);
-                printf("   Р’РѕР№С‚Рё\n-> Р—Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°С‚СЊСЃСЏ\n");
+                printf("   Войти\n-> Зарегистрироваться\n");
                 logReg = 1;
             }
-            if (GetAsyncKeyState(VK_RETURN) != 0)
+            if (GetAsyncKeyState(VK_RETURN) & 1)
             {
-                system("cls");
                 Sleep(200);
                 if (logReg == 0)
                 {
@@ -191,22 +191,26 @@ int main()
                     currWindow = 1;
                     logReg = 0;
                 }
+                while (getchar() != '\n');
+                system("cls");
             }
-            if (GetAsyncKeyState(VK_ESCAPE) != 0)
+            if (GetAsyncKeyState(VK_ESCAPE) & 1)
             {
                 return 0;
             }
         }
 
-        // РћРєРЅРѕ РІС…РѕРґР° РІ СЃРёСЃС‚РµРјСѓ
+        // Окно входа в систему
         if (currWindow == 0)
         {
             char inputLog[20];
             char inputPass[20];
-            printf("Р›РѕРіРёРЅ:\n");
+            printf("Логин: ");
             scanf("%s", &inputLog);
-            printf("РџР°СЂРѕР»СЊ:\n");
+            while (getchar() != '\n');
+            printf("Пароль: ");
             scanf("%s", &inputPass);
+            while (getchar() != '\n');
             FILE* users = fopen("users.txt", "r");
             while(fgets(currUser.login, 100, users) != NULL)
             {
@@ -220,10 +224,10 @@ int main()
                     fscanf(users, "%d", &currUser.isAdmin);
                     currWindow = 2;
                     system("cls");
-                    printf("Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ, %s ", currUser.login);
+                    printf("Добро пожаловать, %s ", currUser.login);
                     if (currUser.isAdmin == 1)
                     {
-                        printf("(РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ)");
+                        printf("(Администратор)");
                     }
                     printf("\n\n");
                     printCards(library, libraryCurr);
@@ -238,31 +242,33 @@ int main()
             if (currWindow != 2)
             {
                 system("cls");
-                printf("РќРµРїСЂР°РІРёР»СЊРЅС‹Р№ Р»РѕРіРёРЅ РёР»Рё РїР°СЂРѕР»СЊ\n");
+                printf("Неправильный логин или пароль\n");
             }
         }
 
-        // РћРєРЅРѕ СЂРµРіРёСЃС‚СЂР°С†РёРё
+        // Окно регистрации
         if (currWindow == 1 && GetAsyncKeyState(VK_ESCAPE) == 0)
         {
             FILE* users = fopen("users.txt", "aw");
             int isRightInput = 0;
             while (isRightInput == 0)
             {
-                printf("РџСЂРёРґСѓРјР°Р№С‚Рµ Р»РѕРіРёРЅ:\n");
+                printf("Придумайте логин: ");
                 scanf("%s", &newUser.login);
+                while (getchar() != '\n');
                 int isWrongLog = 0;
                 for (int i = 0; i < strlen(newUser.login); i++)
                 {
                     if ((newUser.login[i] < 48 || newUser.login[i] > 57) && (newUser.login[i] < 65 || newUser.login[i] > 90) && (newUser.login[i] < 97 || newUser.login[i] > 122))
                     {
                         isWrongLog = 1;
+                        break;
                     }
                 }
                 if (strlen(newUser.login) < 3 || strlen(newUser.login) > 20 || isWrongLog == 1)
                 {
                     system("cls");
-                    printf("Р›РѕРіРёРЅ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РѕС‚ 3 РґРѕ 20 СЃРёРјРІРѕР»РѕРІ Рё СЃРѕСЃС‚РѕСЏС‚СЊ С‚РѕР»СЊРєРѕ РёР· Р±СѓРєРІ Р»Р°С‚РёРЅСЃРєРѕРіРѕ Р°Р»С„Р°РІРёС‚Р° Рё С†РёС„СЂ\n");
+                    printf("Логин должен быть от 3 до 20 символов и состоять только из букв латинского алфавита и цифр\n");
                 }
                 else
                 {
@@ -273,13 +279,15 @@ int main()
             while (isRightInput == 0)
             {
                 int isHighReg = 0, isLowReg = 0, isNum = 0, isWrongPass = 0;;
-                printf("РџСЂРёРґСѓРјР°Р№С‚Рµ РїР°СЂРѕР»СЊ:\n");
+                printf("Придумайте пароль: ");
                 scanf("%s", &newUser.pass);
+                while (getchar() != '\n');
                 for (int i = 0; i < strlen(newUser.pass); i++)
                 {
                     if ((newUser.pass[i] < 48 || newUser.pass[i] > 57) && (newUser.pass[i] < 65 || newUser.pass[i] > 90) && (newUser.pass[i] < 97 || newUser.pass[i] > 122))
                     {
                         isWrongPass = 1;
+                        break;
                     }
                     if (newUser.pass[i] < 58 && newUser.pass[i] > 47)
                     {
@@ -298,21 +306,22 @@ int main()
                         isRightInput = 1;
                     }
                 }
-                if (isNum == 0 || isLowReg == 0 || isHighReg == 0 || strlen(newUser.pass) < 6 && strlen(newUser.pass) > 20 && isWrongPass == 1)
+                if (isNum == 0 || isLowReg == 0 || isHighReg == 0 || strlen(newUser.pass) < 6 || strlen(newUser.pass) > 20 || isWrongPass == 1)
                 {
                     system("cls");
-                    printf("РџР°СЂРѕР»СЊ РґРѕР»Р¶РµРЅ СЃРѕРґРµСЂР¶Р°С‚СЊ РѕС‚ 6 РґРѕ 20 СЃРёРјРІРѕР»РѕРІ, С…РѕС‚СЏ Р±С‹ РѕРґРЅСѓ С†РёС„СЂСѓ Рё Р±СѓРєРІСѓ РІРµСЂС…РЅРµРіРѕ Рё РЅРёР¶РЅРµРіРѕ СЂРµРіРёСЃС‚СЂР° Р»Р°С‚РёРЅСЃРєРѕРіРѕ Р°Р»С„Р°РІРёС‚Р°\n");
+                    printf("Пароль должен содержать от 6 до 20 символов, хотя бы одну цифру и букву верхнего и нижнего регистра латинского алфавита\n");
                 }
             }
             isRightInput = 0;
             while(isRightInput == 0)
             {
-                printf("Р’РІРµРґРёС‚Рµ РЅРѕРјРµСЂ РєР°СЂС‚С‹:\n");
+                printf("Введите номер карты: ");
                 scanf("%lld", &newUser.card);
+                while (getchar() != '\n');
                 if (digits(newUser.card) != 16)
                 {
                     system("cls");
-                    printf("РќРѕРјРµСЂ РєР°СЂС‚С‹ СЃРѕСЃС‚РѕРёС‚ РёР· 16 С†РёС„СЂ\n");
+                    printf("Номер карты состоит из 16 цифр\n");
                 }
                 else
                 {
@@ -326,47 +335,47 @@ int main()
             fprintf(users, "%lld\n", newUser.card);
             fprintf(users, "%d\n", newUser.favSize);
             fprintf(users, "%d", newUser.isAdmin);
-            printf("Р РµРіРёСЃС‚СЂР°С†РёСЏ РїСЂРѕС€Р»Р° СѓСЃРїРµС€РЅРѕ\n");
+            printf("Регистрация прошла успешно\n");
             fclose(users);
             while (GetAsyncKeyState(VK_ESCAPE) == 0)
             {
             }
             system("cls");
             Sleep(200);
-            printf("-> Р’РѕР№С‚Рё\n   Р РµРіРёСЃС‚СЂР°С†РёСЏ\n");
+            printf("-> Войти\n   Зарегистрироваться\n");
             currWindow = -1;
         }
 
-        // РљР°С‚Р°Р»РѕРі
+        // Каталог
         if (currWindow == 2 && GetAsyncKeyState(VK_RETURN) == 0 && GetAsyncKeyState(VK_DOWN) == 0 && GetAsyncKeyState(VK_ESCAPE) == 0)
         {
-            if (GetAsyncKeyState(VK_RIGHT) != 0)
+            if (GetAsyncKeyState(VK_RIGHT) & 1)
             {
                 libraryCurr++;
                 system("cls");
                 Sleep(200);
-                printf("Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ, %s ", currUser.login);
+                printf("Добро пожаловать, %s ", currUser.login);
                 if (currUser.isAdmin == 1)
                 {
-                    printf("(РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ)");
+                    printf("(Администратор)");
                 }
                 printf("\n\n");
                 printCards(library, libraryCurr);
             }
-            if (GetAsyncKeyState(VK_LEFT) != 0)
+            if (GetAsyncKeyState(VK_LEFT) & 1)
             {
                 libraryCurr--;
                 system("cls");
                 Sleep(200);
-                printf("Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ, %s ", currUser.login);
+                printf("Добро пожаловать, %s ", currUser.login);
                 if (currUser.isAdmin == 1)
                 {
-                    printf("(РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ)");
+                    printf("(Администратор)");
                 }
                 printf("\n\n");
                 printCards(library, libraryCurr);
             }
-            if (GetAsyncKeyState(VK_RETURN) != 0)
+            if (GetAsyncKeyState(VK_RETURN) & 1)
             {
                 system("cls");
                 Sleep(200);
@@ -385,22 +394,22 @@ int main()
                         current = current->prev;
                     }
                 }
-                printf("РќР°Р·РІР°РЅРёРµ %s\n", current->film.name);
-                printf("Р“РѕРґ %s\n", current->film.year);
-                printf("РЎС‚СЂР°РЅР° %s\n", current->film.country);
-                printf("Р–Р°РЅСЂ %s\n", current->film.genre);
-                printf("Р РµР№С‚РёРЅРі %s\n", current->film.rating);
+                printf("Название %s\n", current->film.name);
+                printf("Год %s\n", current->film.year);
+                printf("Страна %s\n", current->film.country);
+                printf("Жанр %s\n", current->film.genre);
+                printf("Рейтинг %s\n", current->film.rating);
                 currWindow = 4;
             }
-            if (GetAsyncKeyState(VK_ESCAPE) != 0)
+            if (GetAsyncKeyState(VK_ESCAPE) & 1)
             {
                 system("cls");
                 Sleep(200);
-                printf("-> Р’РѕР№С‚Рё\n   Р—Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°С‚СЊСЃСЏ\n");
+                printf("-> Войти\n   Зарегистрироваться\n");
                 currWindow = -1;
                 libraryCurr = 0;
             }
-            if (currUser.isAdmin == 1 && GetAsyncKeyState(VK_DOWN) != 0)
+            if (currUser.isAdmin == 1 && GetAsyncKeyState(VK_DOWN) & 1)
             {
                 system("cls");
                 Sleep(200);
@@ -408,23 +417,23 @@ int main()
             }
         }
 
-        // РР·Р±СЂР°РЅРЅРѕРµ
+        // Избранное
         if (currWindow == 3)
         {
 
         }
 
-        // РџРѕРґСЂРѕР±РЅР°СЏ РёРЅС„РѕСЂРјР°С†РёСЏ Рѕ С„РёР»СЊРјРµ
+        // Подробная информация о фильме
         if (currWindow == 4 && GetAsyncKeyState(VK_ESCAPE) == 0)
         {
-            if (GetAsyncKeyState(VK_ESCAPE) != 0)
+            if (GetAsyncKeyState(VK_ESCAPE) & 1)
             {
                 system("cls");
                 Sleep(200);
-                printf("Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ, %s ", currUser.login);
+                printf("Добро пожаловать, %s ", currUser.login);
                 if (currUser.isAdmin == 1)
                 {
-                    printf("(РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ)");
+                    printf("(Администратор)");
                 }
                 printf("\n\n");
                 printCards(library, libraryCurr);
@@ -432,28 +441,77 @@ int main()
             }
         }
 
-        // Р›РёС‡РЅС‹Р№ РєР°Р±РёРЅРµС‚
+        // Личный кабинет
         if (currWindow == 5)
         {
 
         }
 
-        // Р”РѕР±Р°РІР»РµРЅРёРµ С„РёР»СЊРјР° РІ РєР°С‚Р°Р»РѕРі
+        // Добавление фильма в каталог
         if (currWindow == 6 && GetAsyncKeyState(VK_ESCAPE) == 0)
         {
             FILE* films = fopen("films.txt", "aw");
-            printf("Р”РѕР±Р°РІР»РµРЅРёРµ С„РёР»СЊРјР° РІ РєР°С‚Р°Р»РѕРі\n\n");
+            printf("Добавление фильма в каталог\n\n");
             struct film newFilm;
-            printf("РќР°Р·РІР°РЅРёРµ: ");
-            scanf("%s", &newFilm.name);
-            printf("Р“РѕРґ: ");
-            scanf("%s", &newFilm.year);
-            printf("РЎС‚СЂР°РЅР°: ");
-            scanf("%s", &newFilm.country);
-            printf("Р–Р°РЅСЂ: ");
-            scanf("%s", &newFilm.genre);
-            printf("Р РµР№С‚РёРЅРі: ");
-            scanf("%s", &newFilm.rating);
+            int isRightInput = 0;
+            printf("Название: ");
+            fgets(newFilm.name, 100, stdin);
+            newFilm.name[strcspn(newFilm.name, "\n")] = '\0';
+            printf("Год: ");
+            while(isRightInput == 0)
+            {   
+                fgets(newFilm.year, 100, stdin);
+                newFilm.year[strcspn(newFilm.year, "\n")] = '\0';
+                int isNum = 1;
+                for (int i = 0; i < strlen(newFilm.year); i++)
+                {
+                    if (newFilm.year[i] < 48 || newFilm.year[i] > 57)
+                    {
+                        isNum = 0;
+                        break;
+                    }
+                }
+                if (isNum == 0)
+                {
+                    system("cls");
+                    printf("Введите число\n");
+                }
+                else
+                {
+                    isRightInput = 1;
+                }
+            }
+            isRightInput = 0;
+            printf("Страна: ");
+            fgets(newFilm.country, 100, stdin);
+            newFilm.country[strcspn(newFilm.country, "\n")] = '\0';
+            printf("Жанр: ");
+            fgets(newFilm.genre, 100, stdin);
+            newFilm.genre[strcspn(newFilm.genre, "\n")] = '\0';
+            printf("Рейтинг: ");
+            while(isRightInput == 0)
+            {   
+                fgets(newFilm.rating, 100, stdin);
+                newFilm.rating[strcspn(newFilm.rating, "\n")] = '\0';
+                int isNum = 1;
+                for (int i = 0; i < strlen(newFilm.year); i++)
+                {
+                    if ((newFilm.rating[i] < 48 || newFilm.rating[i] > 57) && newFilm.rating[i] != '.')
+                    {
+                        isNum = 0;
+                        break;
+                    }
+                }
+                if (isNum == 0)
+                {
+                    system("cls");
+                    printf("Введите число\n");
+                }
+                else
+                {
+                    isRightInput = 1;
+                }
+            }
             fprintf(films, "\n%s", newFilm.name);
             fprintf(films, "\n%s", newFilm.year);
             fprintf(films, "\n%s", newFilm.country);
@@ -461,16 +519,16 @@ int main()
             fprintf(films, "\n%s", newFilm.rating);
             fclose(films);
             push(&library, newFilm);
-            printf("Р¤РёР»СЊРј РґРѕР±Р°РІР»РµРЅ РІ РєР°С‚Р°Р»РѕРі\n");
+            printf("Фильм добавлен в каталог\n");
             while (GetAsyncKeyState(VK_ESCAPE) == 0)
             {
             }
             system("cls");
             Sleep(200);
-            printf("Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ, %s ", currUser.login);
+            printf("Добро пожаловать, %s ", currUser.login);
             if (currUser.isAdmin == 1)
             {
-                printf("(РђРґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ)");
+                printf("(Администратор)");
             }
             printf("\n\n");
             printCards(library, libraryCurr);
