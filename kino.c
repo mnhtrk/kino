@@ -155,7 +155,7 @@ int main()
     fclose(films);
 
     int libraryCurr = 0;
-    int currWindow = 6;
+    int currWindow = -1;
     int logReg = 0, addDel = 0;
     struct user newUser;
     struct user currUser;
@@ -494,7 +494,7 @@ int main()
                 fgets(newFilm.rating, 100, stdin);
                 newFilm.rating[strcspn(newFilm.rating, "\n")] = '\0';
                 int isNum = 1;
-                for (int i = 0; i < strlen(newFilm.year); i++)
+                for (int i = 0; i < strlen(newFilm.rating); i++)
                 {
                     if ((newFilm.rating[i] < 48 || newFilm.rating[i] > 57) && newFilm.rating[i] != '.')
                     {
