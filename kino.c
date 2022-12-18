@@ -114,7 +114,7 @@ int find_user_point(FILE* file, char* string, long point_id)
     {
         if(feof(file)!=0)
         {
-            return feof(file);
+            break;
         }
         for(int i = 0;i<strlen(bufer);i++)
         {
@@ -125,7 +125,7 @@ int find_user_point(FILE* file, char* string, long point_id)
         {
             fgets(bufer, 128, file);
         }
-    }  while(fgets(bufer, 128, file) != string);
+    }  while(strcspn(fgets(bufer, 128, file), string) || feof(file));
 
     fseek(file, strlen(bufer)*(-1), SEEK_END);
     
@@ -586,22 +586,23 @@ int main()
 
             FILE* users = fopen(USERS, "r+");
             long point;
+            int error_code = find_user_point(users,currUser.pass,point);
             
-            if(find_user_point(users,currUser.pass,point)!=0)
+            if(error_code==0)
             {
                 fseek(users,point,SEEK_SET);
 
-                fprintf(users, "%s\n", newUser.login);
-                fprintf(users, "%s\n", newUser.pass);
-                fprintf(users, "%lld\n", newUser.card);
-                fprintf(users, "%d\n", newUser.favSize);
-                fprintf(users, "%d", newUser.isAdmin);
+                fprintf(users, "%s\n", currUser.login);
+                fprintf(users, "%s\n", currUser.pass);
+                fprintf(users, "%lld\n", currUser.card);
+                fprintf(users, "%d\n", currUser.favSize);
+                fprintf(users, "%d", currUser.isAdmin);
                 fclose(users);
             }
             else
             {
                 system("cls");
-                printf("Ошибка записи данных");
+                printf("Ошибка записи данных. Код ошибки: %d", error_code);
                 return 0;           
             }
         }
