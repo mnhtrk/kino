@@ -215,7 +215,7 @@ int main()
                 currUser.pass[strcspn(currUser.pass, "\n")] = 0;
                 if (strcmp(inputLog, currUser.login) == 0 && strcmp(inputPass, currUser.pass) == 0)
                 {
-                    fscanf(users, "%d", &currUser.card);
+                    fscanf(users, "%lld", &currUser.card);
                     fscanf(users, "%d", &currUser.favSize);
                     fscanf(users, "%d", &currUser.isAdmin);
                     currWindow = 2;
