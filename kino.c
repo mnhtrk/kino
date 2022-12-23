@@ -4,8 +4,12 @@
 #include <windows.h>
 #include <math.h>
 
-#define USERS "bin\\users.txt"
-#define FILMS "bin\\films.txt"
+#define USERS_OLD "users.txt"
+#define FILMS_OLD "films.txt"
+#define USERS "bin/users.txt"
+#define FILMS "bin/films.txt"
+#define FAV_FOLDER "bin/favorites"
+
 
 struct film
 {
@@ -106,33 +110,93 @@ int digits(long long n)
     return count;
 }
 
-int find_user_point(FILE* file, char* string, long point_id)
-{//ftell с поиском необходимой строки и возврата нужного указателя по пользователям
-    char bufer[128];
-
-    do
+int streq(char* string1, char* string2)
+{
+    int cond=1;
+    if(strlen(string1)!=strlen(string2))
     {
-        if(feof(file)!=0)
+        cond = 0;
+    }
+    for(int i = 0; i<strlen(string1);i++)
+    {
+        if(string1[i]!=string2[i])
+        {
+            cond=0;
+        }
+        if(cond == 0)
         {
             break;
         }
-        for(int i = 0;i<strlen(bufer);i++)
+    }
+
+    return cond;
+}
+
+int find_user_point(FILE* file, char* string)
+{//ищет ftell юзера
+    char bufer[128];
+
+    fseek(file,0,SEEK_SET);
+    int numofstrs=0;
+
+    while (!feof(file))
+    {
+        fgets(bufer, 128, file);
+        bufer[strcspn(bufer, "\n")] = '\0';
+        int cond = streq(bufer,string);
+        
+        if(cond)
         {
-            bufer[i]=bufer[i];
+            rewind(file);
+            for (int i = 0; i < numofstrs; i++)
+            {
+                fgets(bufer, 128, file);
+            }
+            
+            return 0;
+        }
+        
+        else
+        {
+            ++numofstrs;
+            for(int i = 0; i<4;i++)
+            {
+                fgets(bufer, 128, file);
+                ++numofstrs;
+            }
+        }
+        
+    }
+
+    return -1;
+
+}
+
+int save_user(FILE* file, FILE* bufer, struct user curr_user)
+{
+    char bufer_s[256];
+    if(!find_user_point(file,curr_user.login) && !find_user_point(bufer,curr_user.login))
+    {
+        fprintf(file,"%s",curr_user.login);fgets(bufer_s,256,bufer);
+        fprintf(file,"%s",curr_user.pass);fgets(bufer_s,256,bufer);
+        fprintf(file, "%lld\n", curr_user.card);fgets(bufer_s,256,bufer);
+        fprintf(file, "%d\n", curr_user.favSize);fgets(bufer_s,256,bufer);
+        fprintf(file, "%d\n", curr_user.isAdmin);fgets(bufer_s,256,bufer);
+
+        while(fgetc(bufer)!=EOF)
+        {
+            fgets(bufer_s,256,bufer);
+            fprintf(file,"%s",bufer);
         }
 
-        for(int i = 0; i<4;i++)
+        while(fgetc(file)!=EOF)
         {
-            fgets(bufer, 128, file);
+            fprintf(file,"\0");
         }
-    }  while(strcspn(fgets(bufer, 128, file), string) || feof(file));
 
-    fseek(file, strlen(bufer)*(-1), SEEK_END);
-    
-    point_id = ftell(file);
-
-    return 0;
-
+        return 0;
+    }
+    return -1;
 }
 
 int main()
@@ -189,7 +253,7 @@ int main()
     fclose(films);
 
     int libraryCurr = 0;
-    int currWindow = -1; //!!поменять обратно на -1, 5 поставлено для теста ЛК
+    int currWindow = -1;
     int logReg = 0;
     BYTE keyStatus[256];
     struct user newUser;
@@ -204,21 +268,21 @@ int main()
         {
             if (GetAsyncKeyState(VK_UP) != 0)
             {
-                system("cls");
+                /*system("cls");*/
                 Sleep(200);
                 printf("-> Войти\n   Зарегистрироваться\n");
                 logReg = 0;
             }
             if (GetAsyncKeyState(VK_DOWN) != 0)
             {
-                system("cls");
+                /*system("cls");*/
                 Sleep(200);
                 printf("   Войти\n-> Зарегистрироваться\n");
                 logReg = 1;
             }
             if (GetAsyncKeyState(VK_RETURN) != 0)
             {
-                system("cls");
+                /*system("cls");*/
                 Sleep(200);
                 if (logReg == 0)
                 {
@@ -237,16 +301,17 @@ int main()
             SetKeyboardState(keyStatus);
         }
 
+        fflush(stdin);
+
         // Окно входа в систему
         if (currWindow == 0)
         {
             char inputLog[20];
             char inputPass[20];
-            printf("Логин:\n");
-            scanf("%s", &inputLog);
-            printf("Пароль:\n");
-            scanf("%s", &inputPass);
+            printf("Логин: "); scanf("%s", &inputLog);
+            printf("Пароль: "); scanf("%s", &inputPass);
             FILE* users = fopen(USERS, "r");
+            if (users == NULL) perror("Произошла ошибка: ");
             while(fgets(currUser.login, 100, users) != NULL)
             {
                 currUser.login[strcspn(currUser.login, "\n")] = 0;
@@ -258,7 +323,7 @@ int main()
                     fscanf(users, "%d", &currUser.favSize);
                     fscanf(users, "%d", &currUser.isAdmin);
                     currWindow = 2;
-                    system("cls");
+                    /*system("cls");*/
                     printf("Добро пожаловать, %s\n\n", currUser.login);
                     printCards(library, libraryCurr);
                     break;
@@ -271,7 +336,7 @@ int main()
             fclose(users);
             if (currWindow != 2)
             {
-                system("cls");
+                /*system("cls");*/
                 printf("Неправильный логин или пароль\n");
             }
             SetKeyboardState(keyStatus);
@@ -281,6 +346,7 @@ int main()
         if (currWindow == 1)
         {
             FILE* users = fopen(USERS, "aw");
+            if (users == NULL) perror("Произошла ошибка: ");
             int isRightInput = 0;
             while (isRightInput == 0)
             {
@@ -302,7 +368,7 @@ int main()
                 scanf("%lld", &newUser.card);
                 if (digits(newUser.card) != 16)
                 {
-                    system("cls");
+                    /*system("cls");*/
                     printf("Номер карты состоит из 16 цифр\n");
                 }
                 else
@@ -322,7 +388,7 @@ int main()
             while (GetAsyncKeyState(VK_ESCAPE) == 0)
             {
             }
-            system("cls");
+            /*system("cls");*/
             Sleep(200);
             printf("-> Войти:\n   Регистрация\n");
             currWindow = -1;
@@ -335,7 +401,7 @@ int main()
             if (GetAsyncKeyState(VK_RIGHT) != 0)
             {
                 libraryCurr++;
-                system("cls");
+                /*system("cls");*/
                 Sleep(200);
                 printf("Добро пожаловать, %s\n\n", currUser.login);
                 printCards(library, libraryCurr);
@@ -343,14 +409,14 @@ int main()
             if (GetAsyncKeyState(VK_LEFT) != 0)
             {
                 libraryCurr--;
-                system("cls");
+                /*system("cls");*/
                 Sleep(200);
                 printf("Добро пожаловать, %s\n\n", currUser.login);
                 printCards(library, libraryCurr);
             }
             if (GetAsyncKeyState(VK_ESCAPE) != 0)
             {
-                system("cls");
+                /*system("cls");*/
                 Sleep(200);
                 printf("-> login:\n   registration\n");
                 currWindow = -1;
@@ -379,7 +445,11 @@ int main()
         if (currWindow == 5)
         {
             int choice;
-            system("cls");
+            int err;
+            FILE* users = fopen(USERS, "aw");
+            FILE* users_old = fopen(USERS, "aw");
+            if (users == NULL) perror("Произошла ошибка: ");
+            /*system("cls");*/
             printf("Ваш профиль\n\n");
             printf("Юзернейм: %s\n", currUser.login);
             printf("Пароль: ");
@@ -464,56 +534,63 @@ int main()
             
             case 3: //смена карты
                 long long cardtemp; 
-                system("cls");
+                /*system("cls");*/
                 printf("Введите новый номер карты: ");
                 scanf("%lld",&cardtemp);
                 if(digits(cardtemp) != 16){
-                    system("cls");
+                    /*system("cls");*/
                     printf("Неверный номер карты, повторите попытку снова");
                     Sleep(3000);
                 }
                 else
                 {
                     printf("Введите пароль: ");scanf("%s",passhold);
-                    short cond=1;
-                    for(int i = 0; i<strlen(currUser.pass);i++)
-                    {
-                        if(passhold[i]!=currUser.pass[i])
-                        {
-                            cond=0;
-                        }
-                    }
+                    short cond=streq(passhold,currUser.pass);
+                    
                     if(cond==0)
                     {
-                        system("cls");
+                        /*system("cls");*/
                         printf("Неверный пароль, повторите попытку снова");
                         Sleep(3000);
                     }
-                    currUser.card=cardtemp;
-                    printf("\nУспешная смена карты!");
-                    Sleep(3000);
+                    else
+                    {
+                        currUser.card=cardtemp;
+                        if(err = save_user(users,users_old,currUser)!=0)
+                        {
+                            /*system("cls");*/
+                            printf("Ошибка записи данных. Код ошибки: %d", err);
+                            Sleep(3000);
+                            return err;           
+                        }
+
+                        fclose(users_old);
+                        fclose(users);
+                        
+                        printf("\nУспешная смена карты!");
+                        Sleep(3000);
+                    }
                 }
                 break;
             
             case 4: //смена имени
-                system("cls");
+                /*system("cls");*/
                 char namehold[21];
                 printf("Введите новое имя: ");scanf("%s",namehold);
-                if(3<=strlen(namehold)<=20)
+                if(!(3<=strlen(namehold)<=20))
+                {
+                    /*system("cls");*/
+                    printf("Неверно введено имя, повторите попытку снова");
+                    Sleep(3000);
+                }
+                else
                 {
                     printf("Введите пароль: ");scanf("%s",passhold);
-                    short cond=1;
-                    for(int i = 0; i<strlen(currUser.pass);i++)
-                    {
-                        if(passhold[i]!=currUser.pass[i])
-                        {
-                            cond=0;
-                        }
-                    }
+                    int cond=streq(passhold,currUser.pass);
 
                     if(cond==0)
                     {
-                        system("cls");
+                        /*system("cls");*/
                         printf("Неверный пароль, повторите попытку снова");
                         Sleep(3000);
                     }
@@ -521,35 +598,34 @@ int main()
                     {
                         for(int i = 0; i<strlen(namehold);i++)
                         {
-                            currUser.pass[i]=namehold[i];
-                            currUser.pass[i+1]='\0';
+                            currUser.login[i]=namehold[i];
                         }
+                        currUser.login[strcspn(currUser.login, "\n")] = '\0';
+
+                        if(err = save_user(users,users_old,currUser)!=0)
+                        {
+                            /*system("cls");*/
+                            printf("Ошибка записи данных. Код ошибки: %d", err);
+                            Sleep(3000);
+                            return err;           
+                        }
+
+                        fclose(users_old);
+                        fclose(users);
+                        
                         printf("\nУспешная смена имени!");
                         Sleep(3000);
                     }
                 }
-                else
-                {
-                    system("cls");
-                    printf("Неверно введено имя, повторите попытку снова");
-                    Sleep(3000);
-                }
                 break;
 
             case 5: //смена пароля
-                system("cls");
+                /*system("cls");*/
                 printf("Введите старый пароль: ");scanf("%s",passhold);
-                short cond=1;
-                for(int i = 0; i<strlen(currUser.pass);i++)
-                {
-                    if(passhold[i]!=currUser.pass[i])
-                    {
-                        cond=0;
-                    }
-                }
+                short cond=streq(passhold,currUser.pass);
                 if(cond==0)
                 {
-                    system("cls");
+                    /*system("cls");*/
                     printf("Неверный старый пароль, повторите попытку снова");
                     Sleep(3000);
                 }
@@ -559,7 +635,7 @@ int main()
                     scanf("%s",passhold1);
                     if(strlen(passhold1)>20)
                     {
-                        system("cls");
+                        /*system("cls");*/
                         printf("Неверно набранная строка, повторите попытку снова");
                         Sleep(3000);
                     }
@@ -568,8 +644,20 @@ int main()
                         for(int i = 0; i<strlen(passhold1);i++)
                         {
                             currUser.pass[i]=passhold1[i];
-                            currUser.pass[i+1]='\0';
                         }
+                        currUser.pass[strcspn(currUser.pass, "\n")] = '\0';
+
+                        if(err = save_user(users,users_old,currUser)!=0)
+                        {
+                            /*system("cls");*/
+                            printf("Ошибка записи данных. Код ошибки: %d", err);
+                            Sleep(3000);
+                            return err;           
+                        }
+
+                        fclose(users_old);
+                        fclose(users);
+                        
                         printf("\nУдачная смена пароля!");
                         Sleep(3000);
                     }
@@ -581,29 +669,10 @@ int main()
                 break;
 
             default:
+                /*system("cls");*/
+                printf("Неверное значение!");
+                Sleep(500);
                 break;
-            }
-
-            FILE* users = fopen(USERS, "r+");
-            long point;
-            int error_code = find_user_point(users,currUser.pass,point);
-            
-            if(error_code==0)
-            {
-                fseek(users,point,SEEK_SET);
-
-                fprintf(users, "%s\n", currUser.login);
-                fprintf(users, "%s\n", currUser.pass);
-                fprintf(users, "%lld\n", currUser.card);
-                fprintf(users, "%d\n", currUser.favSize);
-                fprintf(users, "%d", currUser.isAdmin);
-                fclose(users);
-            }
-            else
-            {
-                system("cls");
-                printf("Ошибка записи данных. Код ошибки: %d", error_code);
-                return 0;           
             }
         }
 
