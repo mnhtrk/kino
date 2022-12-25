@@ -4,8 +4,6 @@
 #include <windows.h>
 #include <math.h>
 
-#define USERS_OLD "users.txt"
-#define FILMS_OLD "films.txt"
 #define USERS "bin/users.txt"
 #define FILMS "bin/films.txt"
 #define FAV_FOLDER "bin/favorites"
@@ -172,28 +170,16 @@ int find_user_point(FILE* file, char* string)
 
 }
 
-int save_user(FILE* file, FILE* bufer, struct user curr_user)
+int save_user(FILE* file, struct user curr_user)
 {
     char bufer_s[256];
-    if(!find_user_point(file,curr_user.login) && !find_user_point(bufer,curr_user.login))
+    if(!find_user_point(file,curr_user.login))
     {
-        fprintf(file,"%s",curr_user.login);fgets(bufer_s,256,bufer);
-        fprintf(file,"%s",curr_user.pass);fgets(bufer_s,256,bufer);
-        fprintf(file, "%lld\n", curr_user.card);fgets(bufer_s,256,bufer);
-        fprintf(file, "%d\n", curr_user.favSize);fgets(bufer_s,256,bufer);
-        fprintf(file, "%d\n", curr_user.isAdmin);fgets(bufer_s,256,bufer);
-
-        while(fgetc(bufer)!=EOF)
-        {
-            fgets(bufer_s,256,bufer);
-            fprintf(file,"%s",bufer);
-        }
-
-        while(fgetc(file)!=EOF)
-        {
-            fprintf(file,"\0");
-        }
-
+        fprintf(file,"%s",curr_user.login);
+        fprintf(file,"%s",curr_user.pass);
+        fprintf(file, "%lld\n", curr_user.card);
+        fprintf(file, "%d\n", curr_user.favSize);
+        fprintf(file, "%d\n", curr_user.isAdmin);
         return 0;
     }
     return -1;
@@ -446,8 +432,7 @@ int main()
         {
             int choice;
             int err;
-            FILE* users = fopen(USERS, "aw");
-            FILE* users_old = fopen(USERS, "aw");
+            FILE* users = fopen(USERS, "r+");
             if (users == NULL) perror("Произошла ошибка: ");
             /*system("cls");*/
             printf("Ваш профиль\n\n");
@@ -556,7 +541,7 @@ int main()
                     else
                     {
                         currUser.card=cardtemp;
-                        if(err = save_user(users,users_old,currUser)!=0)
+                        if(err = save_user(users,currUser)!=0)
                         {
                             /*system("cls");*/
                             printf("Ошибка записи данных. Код ошибки: %d", err);
@@ -564,7 +549,6 @@ int main()
                             return err;           
                         }
 
-                        fclose(users_old);
                         fclose(users);
                         
                         printf("\nУспешная смена карты!");
@@ -602,15 +586,13 @@ int main()
                         }
                         currUser.login[strcspn(currUser.login, "\n")] = '\0';
 
-                        if(err = save_user(users,users_old,currUser)!=0)
+                        if(err = save_user(users,currUser)!=0)
                         {
                             /*system("cls");*/
                             printf("Ошибка записи данных. Код ошибки: %d", err);
                             Sleep(3000);
                             return err;           
                         }
-
-                        fclose(users_old);
                         fclose(users);
                         
                         printf("\nУспешная смена имени!");
@@ -647,7 +629,7 @@ int main()
                         }
                         currUser.pass[strcspn(currUser.pass, "\n")] = '\0';
 
-                        if(err = save_user(users,users_old,currUser)!=0)
+                        if(err = save_user(users,currUser)!=0)
                         {
                             /*system("cls");*/
                             printf("Ошибка записи данных. Код ошибки: %d", err);
@@ -655,7 +637,6 @@ int main()
                             return err;           
                         }
 
-                        fclose(users_old);
                         fclose(users);
                         
                         printf("\nУдачная смена пароля!");
