@@ -57,6 +57,14 @@ void pop(struct list* l)
     l->head = current;
 }
 
+void popBack(struct list* l)
+{
+    struct node* current = l->tail->prev;
+    current->next = l->head; 
+    free(l->tail);
+    l->tail = current;
+}
+
 // Вывод нескольких одинаковых символов
 void printElem(int count, char elem)
 {
@@ -138,6 +146,8 @@ int main()
     library.head->next = library.tail;
     library.head->film = f1;
     library.tail->film = f2;
+
+    
     
     while(fgets(f1.name, 100, films) != NULL)
     {
@@ -155,10 +165,13 @@ int main()
     fclose(films);
 
     int libraryCurr = 0;
+    int libraryFavCurr = 0;
     int currWindow = -1;
     int logReg = 0, addDel = 0;
+    char fname[34] = "favourites_";
     struct user newUser;
     struct user currUser;
+    struct list libraryFav;
     printf("-> Войти\n   Зарегистрироваться\n");
     while(TRUE)
     {
@@ -233,7 +246,7 @@ int main()
                     printCards(library, libraryCurr);
                     break;
                 }
-                fscanf(users, "%d", &currUser.card);
+                fscanf(users, "%lld", &currUser.card);
                 fscanf(users, "%d", &currUser.favSize);
                 fscanf(users, "%d", &currUser.isAdmin);
                 fgets(currUser.login, 100, users);
@@ -244,6 +257,13 @@ int main()
                 system("cls");
                 printf("Неправильный логин или пароль\n");
             }
+            char log[20];
+            for (int i = 0; i < strlen(currUser.login); i++)
+            {
+                log[i] = currUser.login[i];
+            }
+            strncat(fname, currUser.login, 20);
+            strncat(fname, ".txt", 5);
         }
 
         // Окно регистрации
@@ -415,12 +435,106 @@ int main()
                 Sleep(200);
                 currWindow = 6;
             }
+            if (currUser.isAdmin == 1 && GetAsyncKeyState(VK_UP) & 1)
+            {
+                system("cls");
+                Sleep(200);
+                currWindow = 3;
+                FILE* currUserFav = fopen(fname, "a+");
+                libraryFav.head = (struct node*) malloc(sizeof(struct node));
+                libraryFav.tail = (struct node*) malloc(sizeof(struct node));
+                libraryFav.tail->next = libraryFav.head;
+                libraryFav.tail->prev = libraryFav.head;
+                libraryFav.head->prev = libraryFav.tail;
+                libraryFav.head->next = libraryFav.tail;
+                libraryFav.head->film = f1;
+                libraryFav.head->film = f2;
+                if (currUser.favSize != 0)
+                {
+                    for (int i = 0; i < currUser.favSize; i++)
+                    {
+                        fgets(f1.name, 100, currUserFav);
+                        f1.name[strcspn(f1.name, "\n")] = '\0';
+                        fgets(f1.year, 100, currUserFav);
+                        f1.year[strcspn(f1.year, "\n")] = '\0';
+                        fgets(f1.country, 100, currUserFav);
+                        f1.country[strcspn(f1.country, "\n")] = '\0';
+                        fgets(f1.genre, 100, currUserFav);
+                        f1.genre[strcspn(f1.genre, "\n")] = '\0';
+                        fgets(f1.rating, 100, currUserFav);
+                        f1.rating[strcspn(f1.rating, "\n")] = '\0';
+                        push(&libraryFav, f1);
+                        if (i <= 1)
+                        {
+                            popBack(&libraryFav);
+                        }
+                    }
+                }
+                printf("Избранное, %s ", currUser.login);
+                if (currUser.isAdmin == 1)
+                {
+                    printf("(Администратор)");
+                }
+                printf("\n\n");
+                printCards(libraryFav, libraryFavCurr);
+            }
         }
 
         // Избранное
         if (currWindow == 3)
         {
-
+            if (GetAsyncKeyState(VK_RIGHT) & 1)
+            {
+                libraryFavCurr++;
+                system("cls");
+                Sleep(200);
+                printf("Избранное, %s ", currUser.login);
+                if (currUser.isAdmin == 1)
+                {
+                    printf("(Администратор)");
+                }
+                printf("\n\n");
+                printCards(libraryFav, libraryFavCurr);
+            }
+            if (GetAsyncKeyState(VK_LEFT) & 1)
+            {
+                libraryFavCurr--;
+                system("cls");
+                Sleep(200);
+                printf("Избранное, %s ", currUser.login);
+                if (currUser.isAdmin == 1)
+                {
+                    printf("(Администратор)");
+                }
+                printf("\n\n");
+                printCards(libraryFav, libraryFavCurr);
+            }
+            if (GetAsyncKeyState(VK_RETURN) & 1)
+            {
+                system("cls");
+                Sleep(200);
+                struct node* current = libraryFav.head;
+                if (libraryCurr > 0)
+                {
+                    for (int i = 0; i < libraryFavCurr; i++)
+                    {
+                        current = current->next;
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i > libraryFavCurr; i--)
+                    {
+                        current = current->prev;
+                    }
+                }
+                printf("Название %s\n", current->film.name);
+                printf("Год %s\n", current->film.year);
+                printf("Страна %s\n", current->film.country);
+                printf("Жанр %s\n", current->film.genre);
+                printf("Рейтинг %s\n", current->film.rating);
+                currWindow = 4;
+            }
         }
 
         // Подробная информация о фильме
