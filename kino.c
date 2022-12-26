@@ -236,6 +236,13 @@ int main()
                     fscanf(users, "%d", &currUser.favSize);
                     fscanf(users, "%d", &currUser.isAdmin);
                     currWindow = 2;
+                    char log[20];
+                    for (int i = 0; i < strlen(currUser.login); i++)
+                    {
+                        log[i] = currUser.login[i];
+                    }
+                    strncat(fname, currUser.login, 20);
+                    strncat(fname, ".txt", 5);
                     system("cls");
                     printf("Добро пожаловать, %s ", currUser.login);
                     if (currUser.isAdmin == 1)
@@ -257,13 +264,6 @@ int main()
                 system("cls");
                 printf("Неправильный логин или пароль\n");
             }
-            char log[20];
-            for (int i = 0; i < strlen(currUser.login); i++)
-            {
-                log[i] = currUser.login[i];
-            }
-            strncat(fname, currUser.login, 20);
-            strncat(fname, ".txt", 5);
         }
 
         // Окно регистрации
@@ -273,10 +273,34 @@ int main()
             int isRightInput = 0;
             while (isRightInput == 0)
             {
+                FILE* usersRead = fopen("users.txt", "r");
                 printf("Придумайте логин: ");
                 scanf("%s", &newUser.login);
                 while (getchar() != '\n');
                 int isWrongLog = 0;
+                int isExistLog = 0;
+                struct user temp;
+                while(fgets(temp.login, 100, usersRead) != NULL)
+                {
+                    temp.login[strcspn(temp.login, "\n")] = '\0';
+                    if (strcmp(newUser.login, temp.login) == 0)
+                    {
+                        fgets(temp.pass, 100, usersRead);
+                        temp.pass[strcspn(temp.pass, "\n")] = '\0';
+                        fscanf(usersRead, "%lld", &temp.card);
+                        fscanf(usersRead, "%d", &temp.favSize);
+                        fscanf(usersRead, "%d", &temp.isAdmin);
+                        isExistLog = 1;
+                        break;
+                    }
+                    fgets(temp.pass, 100, usersRead);
+                    temp.pass[strcspn(temp.pass, "\n")] = '\0';
+                    fscanf(usersRead, "%lld", &temp.card);
+                    fscanf(usersRead, "%d", &temp.favSize);
+                    fscanf(usersRead, "%d", &temp.isAdmin);
+                    char tempSymb[2];
+                    fgets(tempSymb, 100, usersRead);
+                }
                 for (int i = 0; i < strlen(newUser.login); i++)
                 {
                     if ((newUser.login[i] < 48 || newUser.login[i] > 57) && (newUser.login[i] < 65 || newUser.login[i] > 90) && (newUser.login[i] < 97 || newUser.login[i] > 122))
@@ -290,10 +314,16 @@ int main()
                     system("cls");
                     printf("Логин должен быть от 3 до 20 символов и состоять только из букв латинского алфавита и цифр\n");
                 }
+                else if (isExistLog == 1)
+                {
+                    system("cls");
+                    printf("Логин ужесуществует\n");
+                }
                 else
                 {
                     isRightInput = 1;
                 }
+                fclose(usersRead);
             }
             isRightInput = 0;
             while (isRightInput == 0)
@@ -369,9 +399,26 @@ int main()
         // Каталог
         if (currWindow == 2 && GetAsyncKeyState(VK_RETURN) == 0 && GetAsyncKeyState(VK_DOWN) == 0 && GetAsyncKeyState(VK_ESCAPE) == 0)
         {
+            int isInFav;
+            struct node* current = library.head;
+            if (libraryCurr > 0)
+            {
+                for (int i = 0; i < libraryCurr; i++)
+                {
+                    current = current->next;
+                }
+            }
+            else
+            {
+                for (int i = 0; i > libraryCurr; i--)
+                {
+                    current = current->prev;
+                }
+            }
             if (GetAsyncKeyState(VK_RIGHT) & 1)
             {
                 libraryCurr++;
+                current = current->next;
                 system("cls");
                 Sleep(200);
                 printf("Добро пожаловать, %s ", currUser.login);
@@ -381,10 +428,34 @@ int main()
                 }
                 printf("\n\n");
                 printCards(library, libraryCurr);
+                FILE* currUserFav = fopen(fname, "r");
+                char temp[100];
+                isInFav = 0;
+                for (int i = 0; i < currUser.favSize; i++)
+                {
+                    fgets(temp, 100, currUserFav);
+                    temp[strcspn(temp, "\n")] = 0;
+                    if (strcmp(temp, current->film.name) == 0)
+                    {
+                        printf("\nУдалить из избранного\n");
+                        isInFav = 1;
+                        break;
+                    }
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                }
+                if (isInFav == 0)
+                {
+                    printf("\nДобавить в избранное\n");
+                }
+                current = current->prev;
             }
             if (GetAsyncKeyState(VK_LEFT) & 1)
             {
                 libraryCurr--;
+                current = current->prev;
                 system("cls");
                 Sleep(200);
                 printf("Добро пожаловать, %s ", currUser.login);
@@ -394,26 +465,34 @@ int main()
                 }
                 printf("\n\n");
                 printCards(library, libraryCurr);
+                FILE* currUserFav = fopen(fname, "r");
+                char temp[100];
+                isInFav = 0;
+                for (int i = 0; i < currUser.favSize; i++)
+                {
+                    fgets(temp, 100, currUserFav);
+                    temp[strcspn(temp, "\n")] = 0;
+                    if (strcmp(temp, current->film.name) == 0)
+                    {
+                        printf("\nУдалить из избранного\n");
+                        isInFav = 1;
+                        break;
+                    }
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                }
+                if (isInFav == 0)
+                {
+                    printf("\nДобавить в избранное\n");
+                }
+                current = current->next;
             }
             if (GetAsyncKeyState(VK_RETURN) & 1)
             {
                 system("cls");
                 Sleep(200);
-                struct node* current = library.head;
-                if (libraryCurr > 0)
-                {
-                    for (int i = 0; i < libraryCurr; i++)
-                    {
-                        current = current->next;
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i > libraryCurr; i--)
-                    {
-                        current = current->prev;
-                    }
-                }
                 printf("Название %s\n", current->film.name);
                 printf("Год %s\n", current->film.year);
                 printf("Страна %s\n", current->film.country);
@@ -435,7 +514,7 @@ int main()
                 Sleep(200);
                 currWindow = 6;
             }
-            if (currUser.isAdmin == 1 && GetAsyncKeyState(VK_UP) & 1)
+            if (GetAsyncKeyState(VK_UP) & 1)
             {
                 system("cls");
                 Sleep(200);
@@ -477,6 +556,200 @@ int main()
                 }
                 printf("\n\n");
                 printCards(libraryFav, libraryFavCurr);
+            }
+            if (GetAsyncKeyState(VK_OEM_PLUS) & 1 && isInFav == 0)
+            {
+                FILE* currUserFav = fopen(fname, "aw");
+                if (currUser.favSize != 0)
+                {
+                    fprintf(currUserFav, "\n");
+                }
+                fprintf(currUserFav, "%s", current->film.name);
+                fprintf(currUserFav, "\n%s", current->film.year);
+                fprintf(currUserFav, "\n%s", current->film.country);
+                fprintf(currUserFav, "\n%s", current->film.genre);
+                fprintf(currUserFav, "\n%s", current->film.rating);
+                currUser.favSize += 1;
+                fclose(currUserFav);
+                system("cls");
+                Sleep(200);
+                printf("Добро пожаловать, %s ", currUser.login);
+                if (currUser.isAdmin == 1)
+                {
+                    printf("(Администратор)");
+                }
+                printf("\n\n");
+                printCards(library, libraryCurr);
+                printf("\nУдалить из избранного\n");
+                isInFav = 1;
+
+                FILE* users = fopen("users.txt", "r");
+                FILE* ftemp = fopen("ftemp.txt", "w");
+                struct user temp;
+                int size = 0;
+                while(fgets(temp.login, 100, users) != NULL)
+                {
+                    temp.login[strcspn(temp.login, "\n")] = '\0';
+                    fgets(temp.pass, 100, users);
+                    fscanf(users, "%lld", &temp.card);
+                    fscanf(users, "%d", &temp.favSize);
+                    fscanf(users, "%d", &temp.isAdmin);
+                    char tempSymb[2];
+                    fgets(tempSymb, 100, users);
+                    size += 1;
+                    fprintf(ftemp, "%s\n", temp.login);
+                    fprintf(ftemp, "%s", temp.pass);
+                    fprintf(ftemp, "%lld\n", temp.card);
+                    if (strcmp(temp.login, currUser.login) != 0)
+                    {
+                        fprintf(ftemp, "%d\n", temp.favSize);
+                    }
+                    else
+                    {
+                        fprintf(ftemp, "%d\n", temp.favSize + 1);
+                    }
+                    fprintf(ftemp, "%d\n", temp.isAdmin);
+                }
+                fclose(users);
+                fclose(ftemp);
+                FILE* usersNew = fopen("users.txt", "w");
+                FILE* ftempRead = fopen("ftemp.txt", "r");
+                for (int i = 0; i < size; i++)
+                {
+                    struct user temp;
+                    fgets(temp.login, 100, ftempRead);
+                    fgets(temp.pass, 100, ftempRead);
+                    fscanf(ftempRead, "%lld", &temp.card);
+                    fscanf(ftempRead, "%d", &temp.favSize);
+                    fscanf(ftempRead, "%d", &temp.isAdmin);
+                    char tempSymb[2];
+                    fgets(tempSymb, 100, ftempRead);
+                    if (i > 0)
+                    {
+                        fprintf(usersNew, "\n");
+                    }
+                    fprintf(usersNew, "%s", temp.login);
+                    fprintf(usersNew, "%s", temp.pass);
+                    fprintf(usersNew, "%lld\n", temp.card);
+                    fprintf(usersNew, "%d\n", temp.favSize);
+                    fprintf(usersNew, "%d", temp.isAdmin);
+                }
+                fclose(usersNew);
+                fclose(ftempRead);
+            }
+            if (GetAsyncKeyState(VK_OEM_MINUS) & 1 && isInFav == 1)
+            {
+                FILE* currUserFav = fopen(fname, "r");
+                FILE* ftemp = fopen("ftemp.txt", "w");
+                for (int i = 0; i < currUser.favSize; i++)
+                {
+                    struct film temp;
+                    fgets(temp.name, 100, currUserFav);
+                    fgets(temp.year, 100, currUserFav);
+                    fgets(temp.country, 100, currUserFav);
+                    fgets(temp.genre, 100, currUserFav);
+                    fgets(temp.rating, 100, currUserFav);
+                    temp.name[strcspn(temp.name, "\n")] = '\0';
+                    if (strcmp(temp.name, current->film.name) != 0)
+                    {
+                        fprintf(ftemp, "%s\n", temp.name);
+                        fprintf(ftemp, "%s", temp.year);
+                        fprintf(ftemp, "%s", temp.country);
+                        fprintf(ftemp, "%s", temp.genre);
+                        fprintf(ftemp, "%s", temp.rating);
+                    }
+                }
+                fclose(currUserFav);
+                fclose(ftemp);
+                currUser.favSize -= 1;
+                FILE* currUserFavNew = fopen(fname, "w");
+                FILE* ftempRead = fopen("ftemp.txt", "r");
+                for (int i = 0; i < currUser.favSize; i++)
+                {
+                    struct film temp;
+                    fgets(temp.name, 100, ftempRead);
+                    fgets(temp.year, 100, ftempRead);
+                    fgets(temp.country, 100, ftempRead);
+                    fgets(temp.genre, 100, ftempRead);
+                    fgets(temp.rating, 100, ftempRead);
+                    temp.rating[strcspn(temp.rating, "\n")] = '\0';
+                    if (i > 0)
+                    {
+                        fprintf(currUserFavNew, "\n");
+                    }
+                    fprintf(currUserFavNew, "%s", temp.name);
+                    fprintf(currUserFavNew, "%s", temp.year);
+                    fprintf(currUserFavNew, "%s", temp.country);
+                    fprintf(currUserFavNew, "%s", temp.genre);
+                    fprintf(currUserFavNew, "%s", temp.rating);
+                }
+                fclose(ftempRead);
+                fclose(currUserFavNew);
+                system("cls");
+                Sleep(200);
+                printf("Добро пожаловать, %s ", currUser.login);
+                if (currUser.isAdmin == 1)
+                {
+                    printf("(Администратор)");
+                }
+                printf("\n\n");
+                printCards(library, libraryCurr);
+                printf("\nДобавить в избранное\n");
+                isInFav = 0;
+
+                FILE* users = fopen("users.txt", "r");
+                FILE* ftemp2 = fopen("ftemp.txt", "w");
+                struct user temp;
+                int size = 0;
+                while(fgets(temp.login, 100, users) != NULL)
+                {
+                    temp.login[strcspn(temp.login, "\n")] = '\0';
+                    fgets(temp.pass, 100, users);
+                    fscanf(users, "%lld", &temp.card);
+                    fscanf(users, "%d", &temp.favSize);
+                    fscanf(users, "%d", &temp.isAdmin);
+                    char tempSymb[2];
+                    fgets(tempSymb, 100, users);
+                    size += 1;
+                    fprintf(ftemp2, "%s\n", temp.login);
+                    fprintf(ftemp2, "%s", temp.pass);
+                    fprintf(ftemp2, "%lld\n", temp.card);
+                    if (strcmp(temp.login, currUser.login) != 0)
+                    {
+                        fprintf(ftemp2, "%d\n", temp.favSize);
+                    }
+                    else
+                    {
+                        fprintf(ftemp2, "%d\n", temp.favSize - 1);
+                    }
+                    fprintf(ftemp2, "%d\n", temp.isAdmin);
+                }
+                fclose(users);
+                fclose(ftemp2);
+                FILE* usersNew = fopen("users.txt", "w");
+                FILE* ftempRead2 = fopen("ftemp.txt", "r");
+                for (int i = 0; i < size; i++)
+                {
+                    struct user temp;
+                    fgets(temp.login, 100, ftempRead2);
+                    fgets(temp.pass, 100, ftempRead2);
+                    fscanf(ftempRead2, "%lld", &temp.card);
+                    fscanf(ftempRead2, "%d", &temp.favSize);
+                    fscanf(ftempRead2, "%d", &temp.isAdmin);
+                    char tempSymb[2];
+                    fgets(tempSymb, 100, ftempRead);
+                    if (i > 0)
+                    {
+                        fprintf(usersNew, "\n");
+                    }
+                    fprintf(usersNew, "%s", temp.login);
+                    fprintf(usersNew, "%s", temp.pass);
+                    fprintf(usersNew, "%lld\n", temp.card);
+                    fprintf(usersNew, "%d\n", temp.favSize);
+                    fprintf(usersNew, "%d", temp.isAdmin);
+                }
+                fclose(usersNew);
+                fclose(ftempRead2);
             }
         }
 
