@@ -52,7 +52,8 @@ void push(struct list* l, struct film film)
 void pop(struct list* l)
 {
     struct node* current = l->head->next;
-    current->prev = l->tail; 
+    current->prev = l->tail;
+    l->tail->next = current; 
     free(l->head);
     l->head = current;
 }
@@ -60,9 +61,36 @@ void pop(struct list* l)
 void popBack(struct list* l)
 {
     struct node* current = l->tail->prev;
-    current->next = l->head; 
+    current->next = l->head;
+    l->head->prev = current; 
     free(l->tail);
     l->tail = current;
+}
+
+void popIndex(struct list* l, int index)
+{
+    struct node* temp = (struct node*) malloc (sizeof (struct node));
+    struct node* temp2 = (struct node*) malloc (sizeof (struct node));
+    struct node* current = l->head;
+    index -= 1;
+    if (index > 0)
+    {
+        for (int i = 0; i < index; i++)
+        {
+            current = current->next;
+        }
+    }
+    else
+    {
+        for (int i = 0; i > index; i--)
+        {
+            current = current->prev;
+        }
+    }
+    temp = current->next->next;
+    temp->prev = current;
+    free(current->next);
+    current->next = temp;
 }
 
 // Вывод нескольких одинаковых символов
@@ -146,8 +174,6 @@ int main()
     library.head->next = library.tail;
     library.head->film = f1;
     library.tail->film = f2;
-
-    
     
     while(fgets(f1.name, 100, films) != NULL)
     {
@@ -172,9 +198,41 @@ int main()
     struct user newUser;
     struct user currUser;
     struct list libraryFav;
+    int isInFav;
+    struct node* current = library.head;
+    if (libraryCurr > 0)
+    {
+        for (int i = 0; i < libraryCurr; i++)
+        {
+            current = current->next;
+        }
+    }
+    else
+    {
+        for (int i = 0; i > libraryCurr; i--)
+        {
+            current = current->prev;
+        }
+    }
     printf("-> Войти\n   Зарегистрироваться\n");
     while(TRUE)
     {
+        struct node* current = library.head;
+        if (libraryCurr > 0)
+        {
+            for (int i = 0; i < libraryCurr; i++)
+            {
+                current = current->next;
+            }
+        }
+        else
+        {
+            for (int i = 0; i > libraryCurr; i--)
+            {
+                current = current->prev;
+            }
+        }
+        
         // Стартовое окно
         if (currWindow == -1 && GetAsyncKeyState(VK_RETURN) == 0 && GetAsyncKeyState(VK_ESCAPE) == 0)
         {
@@ -251,6 +309,29 @@ int main()
                     }
                     printf("\n\n");
                     printCards(library, libraryCurr);
+                    FILE* currUserFav = fopen(fname, "r");
+                    char temp[100];
+                    isInFav = 0;
+                    for (int i = 0; i < currUser.favSize; i++)
+                    {
+                        fgets(temp, 100, currUserFav);
+                        temp[strcspn(temp, "\n")] = 0;
+                        if (strcmp(temp, current->film.name) == 0)
+                        {
+                            printf("\nУдалить из избранного\n");
+                            isInFav = 1;
+                            break;
+                        }
+                        fgets(temp, 100, currUserFav);
+                        fgets(temp, 100, currUserFav);
+                        fgets(temp, 100, currUserFav);
+                        fgets(temp, 100, currUserFav);
+                    }
+                    if (isInFav == 0)
+                    {
+                        printf("\nДобавить в избранное\n");
+                    }
+                    fclose(currUserFav);
                     break;
                 }
                 fscanf(users, "%lld", &currUser.card);
@@ -397,24 +478,8 @@ int main()
         }
 
         // Каталог
-        if (currWindow == 2 && GetAsyncKeyState(VK_RETURN) == 0 && GetAsyncKeyState(VK_DOWN) == 0 && GetAsyncKeyState(VK_ESCAPE) == 0)
+        if (currWindow == 2 && GetAsyncKeyState(VK_RETURN) == 0 && GetAsyncKeyState(VK_DOWN) == 0 && GetAsyncKeyState(VK_ESCAPE) == 0 && GetAsyncKeyState(VK_UP) == 0 && GetAsyncKeyState(VK_OEM_PLUS) == 0 && GetAsyncKeyState(VK_OEM_MINUS) == 0)
         {
-            int isInFav;
-            struct node* current = library.head;
-            if (libraryCurr > 0)
-            {
-                for (int i = 0; i < libraryCurr; i++)
-                {
-                    current = current->next;
-                }
-            }
-            else
-            {
-                for (int i = 0; i > libraryCurr; i--)
-                {
-                    current = current->prev;
-                }
-            }
             if (GetAsyncKeyState(VK_RIGHT) & 1)
             {
                 libraryCurr++;
@@ -498,6 +563,29 @@ int main()
                 printf("Страна %s\n", current->film.country);
                 printf("Жанр %s\n", current->film.genre);
                 printf("Рейтинг %s\n", current->film.rating);
+                FILE* currUserFav = fopen(fname, "r");
+                char temp[100];
+                isInFav = 0;
+                for (int i = 0; i < currUser.favSize; i++)
+                {
+                    fgets(temp, 100, currUserFav);
+                    temp[strcspn(temp, "\n")] = 0;
+                    if (strcmp(temp, current->film.name) == 0)
+                    {
+                        printf("\nУдалить из избранного\n");
+                        isInFav = 1;
+                        break;
+                    }
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                }
+                if (isInFav == 0)
+                {
+                    printf("\nДобавить в избранное\n");
+                }
+                fclose(currUserFav);
                 currWindow = 4;
             }
             if (GetAsyncKeyState(VK_ESCAPE) & 1)
@@ -514,7 +602,7 @@ int main()
                 Sleep(200);
                 currWindow = 6;
             }
-            if (GetAsyncKeyState(VK_UP) & 1)
+            if (GetAsyncKeyState(VK_UP) & 1 && currUser.favSize != 0)
             {
                 system("cls");
                 Sleep(200);
@@ -526,8 +614,6 @@ int main()
                 libraryFav.tail->prev = libraryFav.head;
                 libraryFav.head->prev = libraryFav.tail;
                 libraryFav.head->next = libraryFav.tail;
-                libraryFav.head->film = f1;
-                libraryFav.head->film = f2;
                 if (currUser.favSize != 0)
                 {
                     for (int i = 0; i < currUser.favSize; i++)
@@ -543,12 +629,10 @@ int main()
                         fgets(f1.rating, 100, currUserFav);
                         f1.rating[strcspn(f1.rating, "\n")] = '\0';
                         push(&libraryFav, f1);
-                        if (i <= 1)
-                        {
-                            popBack(&libraryFav);
-                        }
                     }
                 }
+                popBack(&libraryFav);
+                popBack(&libraryFav);
                 printf("Избранное, %s ", currUser.login);
                 if (currUser.isAdmin == 1)
                 {
@@ -557,6 +641,7 @@ int main()
                 printf("\n\n");
                 printCards(libraryFav, libraryFavCurr);
             }
+            // Добавление в избранное
             if (GetAsyncKeyState(VK_OEM_PLUS) & 1 && isInFav == 0)
             {
                 FILE* currUserFav = fopen(fname, "aw");
@@ -637,6 +722,7 @@ int main()
                 fclose(usersNew);
                 fclose(ftempRead);
             }
+            // Удаление из избранного
             if (GetAsyncKeyState(VK_OEM_MINUS) & 1 && isInFav == 1)
             {
                 FILE* currUserFav = fopen(fname, "r");
@@ -754,8 +840,23 @@ int main()
         }
 
         // Избранное
-        if (currWindow == 3)
+        if (currWindow == 3 && GetAsyncKeyState(VK_RETURN) == 0 && GetAsyncKeyState(VK_ESCAPE) == 0 && GetAsyncKeyState(VK_OEM_PLUS) == 0 && GetAsyncKeyState(VK_OEM_MINUS) == 0)
         {
+            struct node* currentFav = libraryFav.head;
+            if (libraryCurr > 0)
+            {
+                for (int i = 0; i < libraryFavCurr; i++)
+                {
+                    currentFav = currentFav->next;
+                }
+            }
+            else
+            {
+                for (int i = 0; i > libraryFavCurr; i--)
+                {
+                    currentFav = currentFav->prev;
+                }
+            }
             if (GetAsyncKeyState(VK_RIGHT) & 1)
             {
                 libraryFavCurr++;
@@ -786,33 +887,13 @@ int main()
             {
                 system("cls");
                 Sleep(200);
-                struct node* current = libraryFav.head;
-                if (libraryCurr > 0)
-                {
-                    for (int i = 0; i < libraryFavCurr; i++)
-                    {
-                        current = current->next;
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i > libraryFavCurr; i--)
-                    {
-                        current = current->prev;
-                    }
-                }
-                printf("Название %s\n", current->film.name);
-                printf("Год %s\n", current->film.year);
-                printf("Страна %s\n", current->film.country);
-                printf("Жанр %s\n", current->film.genre);
-                printf("Рейтинг %s\n", current->film.rating);
+                printf("Название %s\n", currentFav->film.name);
+                printf("Год %s\n", currentFav->film.year);
+                printf("Страна %s\n", currentFav->film.country);
+                printf("Жанр %s\n", currentFav->film.genre);
+                printf("Рейтинг %s\n", currentFav->film.rating);
                 currWindow = 4;
             }
-        }
-
-        // Подробная информация о фильме
-        if (currWindow == 4 && GetAsyncKeyState(VK_ESCAPE) == 0)
-        {
             if (GetAsyncKeyState(VK_ESCAPE) & 1)
             {
                 system("cls");
@@ -824,6 +905,400 @@ int main()
                 }
                 printf("\n\n");
                 printCards(library, libraryCurr);
+                FILE* currUserFav = fopen(fname, "r");
+                char temp[100];
+                isInFav = 0;
+                for (int i = 0; i < currUser.favSize; i++)
+                {
+                    fgets(temp, 100, currUserFav);
+                    temp[strcspn(temp, "\n")] = 0;
+                    if (strcmp(temp, currentFav->film.name) == 0)
+                    {
+                        printf("\nУдалить из избранного\n");
+                        isInFav = 1;
+                        break;
+                    }
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                }
+                if (isInFav == 0)
+                {
+                    printf("\nДобавить в избранное\n");
+                }
+                fclose(currUserFav);
+                currWindow = 2;
+            }
+            if (GetAsyncKeyState(VK_OEM_MINUS) & 1)
+            {
+                FILE* currUserFav = fopen(fname, "r");
+                FILE* ftemp = fopen("ftemp.txt", "w");
+                for (int i = 0; i < currUser.favSize; i++)
+                {
+                    struct film temp;
+                    fgets(temp.name, 100, currUserFav);
+                    fgets(temp.year, 100, currUserFav);
+                    fgets(temp.country, 100, currUserFav);
+                    fgets(temp.genre, 100, currUserFav);
+                    fgets(temp.rating, 100, currUserFav);
+                    temp.name[strcspn(temp.name, "\n")] = '\0';
+                    if (strcmp(temp.name, currentFav->film.name) != 0)
+                    {
+                        fprintf(ftemp, "%s\n", temp.name);
+                        fprintf(ftemp, "%s", temp.year);
+                        fprintf(ftemp, "%s", temp.country);
+                        fprintf(ftemp, "%s", temp.genre);
+                        fprintf(ftemp, "%s", temp.rating);
+                    }
+                }
+                fclose(currUserFav);
+                fclose(ftemp);
+                currUser.favSize -= 1;
+                FILE* currUserFavNew = fopen(fname, "w");
+                FILE* ftempRead = fopen("ftemp.txt", "r");
+                for (int i = 0; i < currUser.favSize; i++)
+                {
+                    struct film temp;
+                    fgets(temp.name, 100, ftempRead);
+                    fgets(temp.year, 100, ftempRead);
+                    fgets(temp.country, 100, ftempRead);
+                    fgets(temp.genre, 100, ftempRead);
+                    fgets(temp.rating, 100, ftempRead);
+                    temp.rating[strcspn(temp.rating, "\n")] = '\0';
+                    if (i > 0)
+                    {
+                        fprintf(currUserFavNew, "\n");
+                    }
+                    fprintf(currUserFavNew, "%s", temp.name);
+                    fprintf(currUserFavNew, "%s", temp.year);
+                    fprintf(currUserFavNew, "%s", temp.country);
+                    fprintf(currUserFavNew, "%s", temp.genre);
+                    fprintf(currUserFavNew, "%s", temp.rating);
+                }
+                fclose(ftempRead);
+                fclose(currUserFavNew);
+
+                FILE* users = fopen("users.txt", "r");
+                FILE* ftemp2 = fopen("ftemp.txt", "w");
+                struct user temp;
+                int size = 0;
+                while(fgets(temp.login, 100, users) != NULL)
+                {
+                    temp.login[strcspn(temp.login, "\n")] = '\0';
+                    fgets(temp.pass, 100, users);
+                    fscanf(users, "%lld", &temp.card);
+                    fscanf(users, "%d", &temp.favSize);
+                    fscanf(users, "%d", &temp.isAdmin);
+                    char tempSymb[2];
+                    fgets(tempSymb, 100, users);
+                    size += 1;
+                    fprintf(ftemp2, "%s\n", temp.login);
+                    fprintf(ftemp2, "%s", temp.pass);
+                    fprintf(ftemp2, "%lld\n", temp.card);
+                    if (strcmp(temp.login, currUser.login) != 0)
+                    {
+                        fprintf(ftemp2, "%d\n", temp.favSize);
+                    }
+                    else
+                    {
+                        fprintf(ftemp2, "%d\n", temp.favSize - 1);
+                    }
+                    fprintf(ftemp2, "%d\n", temp.isAdmin);
+                }
+                fclose(users);
+                fclose(ftemp2);
+                FILE* usersNew = fopen("users.txt", "w");
+                FILE* ftempRead2 = fopen("ftemp.txt", "r");
+                for (int i = 0; i < size; i++)
+                {
+                    struct user temp;
+                    fgets(temp.login, 100, ftempRead2);
+                    fgets(temp.pass, 100, ftempRead2);
+                    fscanf(ftempRead2, "%lld", &temp.card);
+                    fscanf(ftempRead2, "%d", &temp.favSize);
+                    fscanf(ftempRead2, "%d", &temp.isAdmin);
+                    char tempSymb[2];
+                    fgets(tempSymb, 100, ftempRead);
+                    if (i > 0)
+                    {
+                        fprintf(usersNew, "\n");
+                    }
+                    fprintf(usersNew, "%s", temp.login);
+                    fprintf(usersNew, "%s", temp.pass);
+                    fprintf(usersNew, "%lld\n", temp.card);
+                    fprintf(usersNew, "%d\n", temp.favSize);
+                    fprintf(usersNew, "%d", temp.isAdmin);
+                }
+                fclose(usersNew);
+                fclose(ftempRead2);
+                if (libraryFavCurr == 0)
+                {
+                    pop(&libraryFav);
+                }
+                else
+                {
+                    popIndex(&libraryFav, libraryFavCurr);
+                }
+                
+                if (currUser.favSize == 0)
+                {
+                    system("cls");
+                    Sleep(200);
+                    printf("Добро пожаловать, %s ", currUser.login);
+                    if (currUser.isAdmin == 1)
+                    {
+                        printf("(Администратор)");
+                    }
+                    printf("\n\n");
+                    printCards(library, libraryCurr);
+                    printf("\nДобавить в избранное\n");
+                    currWindow = 2;
+                }
+                else
+                {
+                    system("cls");
+                    Sleep(200);
+                    printf("Избранное, %s ", currUser.login);
+                    if (currUser.isAdmin == 1)
+                    {
+                        printf("(Администратор)");
+                    }
+                    printf("\n\n");
+                    printCards(libraryFav, libraryFavCurr);
+                }
+            }
+        }
+
+        // Подробная информация о фильме
+        if (currWindow == 4 && GetAsyncKeyState(VK_ESCAPE) == 0)
+        {
+            // Добавление в избранное
+            if (GetAsyncKeyState(VK_OEM_PLUS) & 1 && isInFav == 0)
+            {
+                FILE* currUserFav = fopen(fname, "aw");
+                if (currUser.favSize != 0)
+                {
+                    fprintf(currUserFav, "\n");
+                }
+                fprintf(currUserFav, "%s", current->film.name);
+                fprintf(currUserFav, "\n%s", current->film.year);
+                fprintf(currUserFav, "\n%s", current->film.country);
+                fprintf(currUserFav, "\n%s", current->film.genre);
+                fprintf(currUserFav, "\n%s", current->film.rating);
+                currUser.favSize += 1;
+                fclose(currUserFav);
+                system("cls");
+                Sleep(200);
+                printf("Название %s\n", current->film.name);
+                printf("Год %s\n", current->film.year);
+                printf("Страна %s\n", current->film.country);
+                printf("Жанр %s\n", current->film.genre);
+                printf("Рейтинг %s\n", current->film.rating);
+                printf("\nУдалить из избранного\n");
+                isInFav = 1;
+
+                FILE* users = fopen("users.txt", "r");
+                FILE* ftemp = fopen("ftemp.txt", "w");
+                struct user temp;
+                int size = 0;
+                while(fgets(temp.login, 100, users) != NULL)
+                {
+                    temp.login[strcspn(temp.login, "\n")] = '\0';
+                    fgets(temp.pass, 100, users);
+                    fscanf(users, "%lld", &temp.card);
+                    fscanf(users, "%d", &temp.favSize);
+                    fscanf(users, "%d", &temp.isAdmin);
+                    char tempSymb[2];
+                    fgets(tempSymb, 100, users);
+                    size += 1;
+                    fprintf(ftemp, "%s\n", temp.login);
+                    fprintf(ftemp, "%s", temp.pass);
+                    fprintf(ftemp, "%lld\n", temp.card);
+                    if (strcmp(temp.login, currUser.login) != 0)
+                    {
+                        fprintf(ftemp, "%d\n", temp.favSize);
+                    }
+                    else
+                    {
+                        fprintf(ftemp, "%d\n", temp.favSize + 1);
+                    }
+                    fprintf(ftemp, "%d\n", temp.isAdmin);
+                }
+                fclose(users);
+                fclose(ftemp);
+                FILE* usersNew = fopen("users.txt", "w");
+                FILE* ftempRead = fopen("ftemp.txt", "r");
+                for (int i = 0; i < size; i++)
+                {
+                    struct user temp;
+                    fgets(temp.login, 100, ftempRead);
+                    fgets(temp.pass, 100, ftempRead);
+                    fscanf(ftempRead, "%lld", &temp.card);
+                    fscanf(ftempRead, "%d", &temp.favSize);
+                    fscanf(ftempRead, "%d", &temp.isAdmin);
+                    char tempSymb[2];
+                    fgets(tempSymb, 100, ftempRead);
+                    if (i > 0)
+                    {
+                        fprintf(usersNew, "\n");
+                    }
+                    fprintf(usersNew, "%s", temp.login);
+                    fprintf(usersNew, "%s", temp.pass);
+                    fprintf(usersNew, "%lld\n", temp.card);
+                    fprintf(usersNew, "%d\n", temp.favSize);
+                    fprintf(usersNew, "%d", temp.isAdmin);
+                }
+                fclose(usersNew);
+                fclose(ftempRead);
+            }
+            // Удаление из избранного
+            if (GetAsyncKeyState(VK_OEM_MINUS) & 1 && isInFav == 1)
+            {
+                FILE* currUserFav = fopen(fname, "r");
+                FILE* ftemp = fopen("ftemp.txt", "w");
+                for (int i = 0; i < currUser.favSize; i++)
+                {
+                    struct film temp;
+                    fgets(temp.name, 100, currUserFav);
+                    fgets(temp.year, 100, currUserFav);
+                    fgets(temp.country, 100, currUserFav);
+                    fgets(temp.genre, 100, currUserFav);
+                    fgets(temp.rating, 100, currUserFav);
+                    temp.name[strcspn(temp.name, "\n")] = '\0';
+                    if (strcmp(temp.name, current->film.name) != 0)
+                    {
+                        fprintf(ftemp, "%s\n", temp.name);
+                        fprintf(ftemp, "%s", temp.year);
+                        fprintf(ftemp, "%s", temp.country);
+                        fprintf(ftemp, "%s", temp.genre);
+                        fprintf(ftemp, "%s", temp.rating);
+                    }
+                }
+                fclose(currUserFav);
+                fclose(ftemp);
+                currUser.favSize -= 1;
+                FILE* currUserFavNew = fopen(fname, "w");
+                FILE* ftempRead = fopen("ftemp.txt", "r");
+                for (int i = 0; i < currUser.favSize; i++)
+                {
+                    struct film temp;
+                    fgets(temp.name, 100, ftempRead);
+                    fgets(temp.year, 100, ftempRead);
+                    fgets(temp.country, 100, ftempRead);
+                    fgets(temp.genre, 100, ftempRead);
+                    fgets(temp.rating, 100, ftempRead);
+                    temp.rating[strcspn(temp.rating, "\n")] = '\0';
+                    if (i > 0)
+                    {
+                        fprintf(currUserFavNew, "\n");
+                    }
+                    fprintf(currUserFavNew, "%s", temp.name);
+                    fprintf(currUserFavNew, "%s", temp.year);
+                    fprintf(currUserFavNew, "%s", temp.country);
+                    fprintf(currUserFavNew, "%s", temp.genre);
+                    fprintf(currUserFavNew, "%s", temp.rating);
+                }
+                fclose(ftempRead);
+                fclose(currUserFavNew);
+                system("cls");
+                Sleep(200);
+                printf("Название %s\n", current->film.name);
+                printf("Год %s\n", current->film.year);
+                printf("Страна %s\n", current->film.country);
+                printf("Жанр %s\n", current->film.genre);
+                printf("Рейтинг %s\n", current->film.rating);
+                printf("\nДобавить в избранное\n");
+                isInFav = 0;
+
+                FILE* users = fopen("users.txt", "r");
+                FILE* ftemp2 = fopen("ftemp.txt", "w");
+                struct user temp;
+                int size = 0;
+                while(fgets(temp.login, 100, users) != NULL)
+                {
+                    temp.login[strcspn(temp.login, "\n")] = '\0';
+                    fgets(temp.pass, 100, users);
+                    fscanf(users, "%lld", &temp.card);
+                    fscanf(users, "%d", &temp.favSize);
+                    fscanf(users, "%d", &temp.isAdmin);
+                    char tempSymb[2];
+                    fgets(tempSymb, 100, users);
+                    size += 1;
+                    fprintf(ftemp2, "%s\n", temp.login);
+                    fprintf(ftemp2, "%s", temp.pass);
+                    fprintf(ftemp2, "%lld\n", temp.card);
+                    if (strcmp(temp.login, currUser.login) != 0)
+                    {
+                        fprintf(ftemp2, "%d\n", temp.favSize);
+                    }
+                    else
+                    {
+                        fprintf(ftemp2, "%d\n", temp.favSize - 1);
+                    }
+                    fprintf(ftemp2, "%d\n", temp.isAdmin);
+                }
+                fclose(users);
+                fclose(ftemp2);
+                FILE* usersNew = fopen("users.txt", "w");
+                FILE* ftempRead2 = fopen("ftemp.txt", "r");
+                for (int i = 0; i < size; i++)
+                {
+                    struct user temp;
+                    fgets(temp.login, 100, ftempRead2);
+                    fgets(temp.pass, 100, ftempRead2);
+                    fscanf(ftempRead2, "%lld", &temp.card);
+                    fscanf(ftempRead2, "%d", &temp.favSize);
+                    fscanf(ftempRead2, "%d", &temp.isAdmin);
+                    char tempSymb[2];
+                    fgets(tempSymb, 100, ftempRead);
+                    if (i > 0)
+                    {
+                        fprintf(usersNew, "\n");
+                    }
+                    fprintf(usersNew, "%s", temp.login);
+                    fprintf(usersNew, "%s", temp.pass);
+                    fprintf(usersNew, "%lld\n", temp.card);
+                    fprintf(usersNew, "%d\n", temp.favSize);
+                    fprintf(usersNew, "%d", temp.isAdmin);
+                }
+                fclose(usersNew);
+                fclose(ftempRead2);
+            }
+            if (GetAsyncKeyState(VK_ESCAPE) & 1)
+            {
+                system("cls");
+                Sleep(200);
+                printf("Добро пожаловать, %s ", currUser.login);
+                if (currUser.isAdmin == 1)
+                {
+                    printf("(Администратор)");
+                }
+                printf("\n\n");
+                printCards(library, libraryCurr);
+                FILE* currUserFav = fopen(fname, "r");
+                char temp[100];
+                isInFav = 0;
+                for (int i = 0; i < currUser.favSize; i++)
+                {
+                    fgets(temp, 100, currUserFav);
+                    temp[strcspn(temp, "\n")] = 0;
+                    if (strcmp(temp, current->film.name) == 0)
+                    {
+                        printf("\nУдалить из избранного\n");
+                        isInFav = 1;
+                        break;
+                    }
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                }
+                if (isInFav == 0)
+                {
+                    printf("\nДобавить в избранное\n");
+                }
+                fclose(currUserFav);
                 currWindow = 2;
             }
         }
@@ -919,6 +1394,29 @@ int main()
             }
             printf("\n\n");
             printCards(library, libraryCurr);
+            FILE* currUserFav = fopen(fname, "r");
+            char temp[100];
+            isInFav = 0;
+            for (int i = 0; i < currUser.favSize; i++)
+            {
+                fgets(temp, 100, currUserFav);
+                temp[strcspn(temp, "\n")] = 0;
+                if (strcmp(temp, current->film.name) == 0)
+                {
+                    printf("\nУдалить из избранного\n");
+                    isInFav = 1;
+                    break;
+                }
+                fgets(temp, 100, currUserFav);
+                fgets(temp, 100, currUserFav);
+                fgets(temp, 100, currUserFav);
+                fgets(temp, 100, currUserFav);
+            }
+            if (isInFav == 0)
+            {
+                printf("\nДобавить в избранное\n");
+            }
+            fclose(currUserFav);
             currWindow = 2;
         }
     }
