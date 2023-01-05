@@ -7,8 +7,10 @@
 #define USERS "bin/users.txt"
 #define FILMS "bin/films.txt"
 #define FAV_FOLDER "bin/favorites"
+#define BUF 256
 
-
+///////////////////////////////////////////////////////////////////////////////////
+//структура фильма и список к нему
 struct film
 {
     char name[100];
@@ -18,32 +20,23 @@ struct film
     char rating[5];
 };
 
-struct node
+struct film_node
 {
     struct film film;
-    struct node* next;
-    struct node* prev;
+    struct film_node* next;
+    struct film_node* prev;
 };
 
-struct list
+struct film_list
 {
-    struct node* head;
-    struct node* tail;
+    struct film_node* head;
+    struct film_node* tail;
 };  
 
-struct user
-{
-    char login[20];
-    char pass[20];
-    long long card;
-    int favSize;
-    int isAdmin;
-};
-
 // Добавление элемента
-void push(struct list* l, struct film film)
+void push_film(struct film_list* l, struct film film)
 {
-    struct node* current = (struct node*) malloc(sizeof(struct node));
+    struct film_node* current = (struct film_node*) malloc(sizeof(struct film_node));
     current->film = film;
     current->next = l->head;
     current->prev = l->tail;
@@ -53,27 +46,84 @@ void push(struct list* l, struct film film)
 }
 
 // Удаление элемента
-void pop(struct list* l)
+void pop_film(struct film_list* l)
 {
-    struct node* current = l->head->next;
+    struct film_node* current = l->head->next;
+    current->prev = l->tail; 
+    free(l->head);
+    l->head = current;
+}
+///////////////////////////////////////////////////////////////////////////////////
+
+
+///////////////////////////////////////////////////////////////////////////////////
+//структура юзера и лист к нему
+struct user
+{
+    char login[20];
+    char pass[20];
+    long long card;
+    int favSize;
+    int isAdmin;
+};
+
+struct user_node
+{
+    struct user user;
+    struct user_node* next;
+    struct user_node* prev;
+};
+
+struct user_list
+{
+    struct user_node* head;
+    struct user_node* tail;
+};
+
+// Добавление элемента
+void push_user(struct user_list* l, struct user user)
+{
+    struct user_node* current = (struct user_node*) malloc(sizeof(struct user_node));
+    current->user = user;
+    current->next = NULL;
+    current->prev = l->tail;
+    // l->head->prev = current;
+    l->tail->next = current;
+    l->tail = current;
+}
+
+// Удаление элемента
+void pop_user(struct user_list* l)
+{
+    struct user_node* current = l->head->next;
     current->prev = l->tail; 
     free(l->head);
     l->head = current;
 }
 
-// Вывод нескольких одинаковых символов
-void printElem(int count, char elem)
+int find_user(struct user_list user_list, char* login)
 {
-    for (int i = 0; i < count; i++)
+    struct user_node* current = user_list.head;
+    int count=0;
+    while(current->user.login!=login)
     {
-        printf("%c", elem);
+        if(current->next==NULL)
+        {
+            return -1;
+        }
+        current=current->next;
+        ++count;
     }
+    return count;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////
+
 // Карусель
-void printCards(struct list l, int index)
+void printCards(struct film_list l, int index)
 {
-    struct node* current = l.head;
+    struct film_node* current = l.head;
     if (index > 0)
     {
         for (int i = 0; i < index; i++)
@@ -108,6 +158,7 @@ int digits(long long n)
     return count;
 }
 
+//функция сравнивания строк
 int streq(char* string1, char* string2)
 {
     int cond=1;
@@ -130,59 +181,15 @@ int streq(char* string1, char* string2)
     return cond;
 }
 
-int find_user_point(FILE* file, char* string)
-{//ищет ftell юзера
-    char bufer[128];
-
-    fseek(file,0,SEEK_SET);
-    int numofstrs=0;
-
-    while (!feof(file))
-    {
-        fgets(bufer, 128, file);
-        bufer[strcspn(bufer, "\n")] = '\0';
-        int cond = streq(bufer,string);
-        
-        if(cond)
-        {
-            rewind(file);
-            for (int i = 0; i < numofstrs; i++)
-            {
-                fgets(bufer, 128, file);
-            }
-            
-            return 0;
-        }
-        
-        else
-        {
-            ++numofstrs;
-            for(int i = 0; i<4;i++)
-            {
-                fgets(bufer, 128, file);
-                ++numofstrs;
-            }
-        }
-        
-    }
-
-    return -1;
-
-}
-
-int save_user(FILE* file, struct user curr_user)
+void save_user_base(struct user_list user_list, FILE* save_txt)
 {
-    char bufer_s[256];
-    if(!find_user_point(file,curr_user.login))
+    struct user_node* current = (struct user_node*) malloc(sizeof(struct user_node));
+     while (current!=NULL)
     {
-        fprintf(file,"%s",curr_user.login);
-        fprintf(file,"%s",curr_user.pass);
-        fprintf(file, "%lld\n", curr_user.card);
-        fprintf(file, "%d\n", curr_user.favSize);
-        fprintf(file, "%d\n", curr_user.isAdmin);
-        return 0;
+        printf("%s\n%s\n%lld\n%%d\n%d\n", current->user.login, current->user.pass, 
+        current->user.card, current->user.favSize, current->user.isAdmin);
+        current=current->next;
     }
-    return -1;
 }
 
 int main()
@@ -192,30 +199,30 @@ int main()
 
     FILE* films = fopen(FILMS, "r");
     struct film f1, f2;
-    fgets(f1.name, 100, films);
+    fgets(f1.name, BUF, films);
     f1.name[strcspn(f1.name, "\n")] = '\0';
-    fgets(f1.year, 100, films);
+    fgets(f1.year, BUF, films);
     f1.year[strcspn(f1.year, "\n")] = '\0';
-    fgets(f1.country, 100, films);
+    fgets(f1.country, BUF, films);
     f1.country[strcspn(f1.country, "\n")] = '\0';
-    fgets(f1.genre, 100, films);
+    fgets(f1.genre, BUF, films);
     f1.genre[strcspn(f1.genre, "\n")] = '\0';
-    fgets(f1.rating, 100, films);
+    fgets(f1.rating, BUF, films);
     f1.rating[strcspn(f1.rating, "\n")] = '\0';
-    fgets(f2.name, 100, films);
+    fgets(f2.name, BUF, films);
     f2.name[strcspn(f2.name, "\n")] = '\0';
-    fgets(f2.year, 100, films);
+    fgets(f2.year, BUF, films);
     f2.year[strcspn(f2.year, "\n")] = '\0';
-    fgets(f2.country, 100, films);
+    fgets(f2.country, BUF, films);
     f2.country[strcspn(f2.country, "\n")] = '\0';
-    fgets(f2.genre, 100, films);
+    fgets(f2.genre, BUF, films);
     f2.genre[strcspn(f2.genre, "\n")] = '\0';
-    fgets(f2.rating, 100, films);
+    fgets(f2.rating, BUF, films);
     f2.rating[strcspn(f2.rating, "\n")] = '\0';
 
-    struct list library;
-    library.head = (struct node*) malloc(sizeof(struct node));
-    library.tail = (struct node*) malloc(sizeof(struct node));
+    struct film_list library;
+    library.head = (struct film_node*) malloc(sizeof(struct film_node));
+    library.tail = (struct film_node*) malloc(sizeof(struct film_node));
     library.tail->next = library.head;
     library.tail->prev = library.head;
     library.head->prev = library.tail;
@@ -223,25 +230,59 @@ int main()
     library.head->film = f1;
     library.tail->film = f2;
     
-    while(fgets(f1.name, 100, films) != NULL)
+    while(fgets(f1.name, BUF, films) != NULL)
     {
         f1.name[strcspn(f1.name, "\n")] = '\0';
-        fgets(f1.year, 100, films);
+        fgets(f1.year, BUF, films);
         f1.year[strcspn(f1.year, "\n")] = '\0';
-        fgets(f1.country, 100, films);
+        fgets(f1.country, BUF, films);
         f1.country[strcspn(f1.country, "\n")] = '\0';
-        fgets(f1.genre, 100, films);
+        fgets(f1.genre, BUF, films);
         f1.genre[strcspn(f1.genre, "\n")] = '\0';
-        fgets(f1.rating, 100, films);
+        fgets(f1.rating, BUF, films);
         f1.rating[strcspn(f1.rating, "\n")] = '\0';
-        push(&library, f1);
+        push_film(&library, f1);
     }
     fclose(films);
+
+    FILE* users = fopen(USERS, "r");
+    struct user u1, u2;
+    fgets(u1.login, BUF, users);
+    u1.login[strcspn(u1.login, "\n")] = '\0';
+    fgets(u1.pass, BUF, users);
+    u1.pass[strcspn(u1.pass, "\n")] = '\0';
+    fscanf(users,"%lld%d%d\n",&u1.card,&u1.favSize,&u1.isAdmin);
+    fgets(u2.login, BUF, users);
+    u2.login[strcspn(u2.login, "\n")] = '\0';
+    fgets(u2.pass, BUF, users);
+    u2.pass[strcspn(u2.pass, "\n")] = '\0';
+    fscanf(users,"%lld%d%d\n",&u2.card,&u2.favSize,&u2.isAdmin);
+
+    struct user_list all_users;
+    all_users.head = (struct user_node*) malloc(sizeof(struct user_node));
+    all_users.tail = (struct user_node*) malloc(sizeof(struct user_node));
+    all_users.tail->next = NULL;
+    all_users.tail->prev = all_users.head;
+    all_users.head->prev = NULL;
+    all_users.head->next = all_users.tail;
+    all_users.head->user = u1;
+    all_users.tail->user = u2;
+    
+    while(fgets(u1.login, BUF, users) != NULL)
+    {
+        u1.login[strcspn(u1.login, "\n")] = '\0';
+        fgets(u1.pass, BUF, users);
+        u1.pass[strcspn(u1.pass, "\n")] = '\0';
+        fscanf(users,"%lld%d%d\n",&u1.card,&u1.favSize,&u1.isAdmin);
+        push_user(&all_users, u1);
+    }
+    fclose(users);
+
 
     int libraryCurr = 0;
     int currWindow = -1;
     int logReg = 0;
-    BYTE keyStatus[256];
+    BYTE keyStatus[BUF];
     struct user newUser;
     struct user currUser;
     short showPass = 0;
@@ -298,10 +339,10 @@ int main()
             printf("Пароль: "); scanf("%s", &inputPass);
             FILE* users = fopen(USERS, "r");
             if (users == NULL) perror("Произошла ошибка: ");
-            while(fgets(currUser.login, 100, users) != NULL)
+            while(fgets(currUser.login, BUF, users) != NULL)
             {
                 currUser.login[strcspn(currUser.login, "\n")] = 0;
-                fgets(currUser.pass, 100, users);
+                fgets(currUser.pass, BUF, users);
                 currUser.pass[strcspn(currUser.pass, "\n")] = 0;
                 if (strcmp(inputLog, currUser.login) == 0 && strcmp(inputPass, currUser.pass) == 0)
                 {
@@ -317,7 +358,7 @@ int main()
                 fscanf(users, "%d", &currUser.card);
                 fscanf(users, "%d", &currUser.favSize);
                 fscanf(users, "%d", &currUser.isAdmin);
-                fgets(currUser.login, 100, users);
+                fgets(currUser.login, BUF, users);
             }
             fclose(users);
             if (currWindow != 2)
@@ -540,15 +581,16 @@ int main()
                     }
                     else
                     {
+                        
+                        // if(err = find_user_point(users,currUser.login)!=0)
+                        // {
+                        //     /*system("cls");*/
+                        //     printf("Ошибка записи данных. Код ошибки: %d", err);
+                        //     Sleep(3000);
+                        //     return err;           
+                        // }
                         currUser.card=cardtemp;
-                        if(err = save_user(users,currUser)!=0)
-                        {
-                            /*system("cls");*/
-                            printf("Ошибка записи данных. Код ошибки: %d", err);
-                            Sleep(3000);
-                            return err;           
-                        }
-
+                        save_user_base(all_users, users);
                         fclose(users);
                         
                         printf("\nУспешная смена карты!");
@@ -580,19 +622,21 @@ int main()
                     }
                     else
                     {
+                        
+
+                        // if(err = find_user_point(users,currUser.login)!=0)
+                        // {
+                        //     /*system("cls");*/
+                        //     printf("Ошибка записи данных. Код ошибки: %d", err);
+                        //     Sleep(3000);
+                        //     return err;           
+                        // }
                         for(int i = 0; i<strlen(namehold);i++)
                         {
                             currUser.login[i]=namehold[i];
+                            currUser.login[i+1]='\0';
                         }
-                        currUser.login[strcspn(currUser.login, "\n")] = '\0';
-
-                        if(err = save_user(users,currUser)!=0)
-                        {
-                            /*system("cls");*/
-                            printf("Ошибка записи данных. Код ошибки: %d", err);
-                            Sleep(3000);
-                            return err;           
-                        }
+                        save_user_base(all_users, users);
                         fclose(users);
                         
                         printf("\nУспешная смена имени!");
@@ -623,20 +667,21 @@ int main()
                     }
                     else
                     {
+
+
+                        // if(err = find_user_point(users,currUser.login)!=0)
+                        // {
+                        //     /*system("cls");*/
+                        //     printf("Ошибка записи данных. Код ошибки: %d", err);
+                        //     Sleep(3000);
+                        //     return err;           
+                        // }
                         for(int i = 0; i<strlen(passhold1);i++)
                         {
                             currUser.pass[i]=passhold1[i];
+                            currUser.pass[i+1]='\0';
                         }
-                        currUser.pass[strcspn(currUser.pass, "\n")] = '\0';
-
-                        if(err = save_user(users,currUser)!=0)
-                        {
-                            /*system("cls");*/
-                            printf("Ошибка записи данных. Код ошибки: %d", err);
-                            Sleep(3000);
-                            return err;           
-                        }
-
+                        save_user_base(all_users, users);
                         fclose(users);
                         
                         printf("\nУдачная смена пароля!");
