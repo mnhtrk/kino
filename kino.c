@@ -194,11 +194,13 @@ int main()
     int libraryFavCurr = 0;
     int currWindow = -1;
     int logReg = 0, addDel = 0;
-    char fname[34] = "favourites_";
+    char fname[34];
     struct user newUser;
     struct user currUser;
     struct list libraryFav;
     int isInFav;
+    short showPass = 0;
+    short showCard = 0;
     struct node* current = library.head;
     if (libraryCurr > 0)
     {
@@ -299,6 +301,7 @@ int main()
                     {
                         log[i] = currUser.login[i];
                     }
+                    strcpy(fname, "favourites_");
                     strncat(fname, currUser.login, 20);
                     strncat(fname, ".txt", 5);
                     system("cls");
@@ -398,7 +401,7 @@ int main()
                 else if (isExistLog == 1)
                 {
                     system("cls");
-                    printf("Логин ужесуществует\n");
+                    printf("Логин уже существует\n");
                 }
                 else
                 {
@@ -409,7 +412,7 @@ int main()
             isRightInput = 0;
             while (isRightInput == 0)
             {
-                int isHighReg = 0, isLowReg = 0, isNum = 0, isWrongPass = 0;;
+                int isHighReg = 0, isLowReg = 0, isNum = 0, isWrongPass = 0;
                 printf("Придумайте пароль: ");
                 scanf("%s", &newUser.pass);
                 while (getchar() != '\n');
@@ -823,7 +826,7 @@ int main()
                     fscanf(ftempRead2, "%d", &temp.favSize);
                     fscanf(ftempRead2, "%d", &temp.isAdmin);
                     char tempSymb[2];
-                    fgets(tempSymb, 100, ftempRead);
+                    fgets(tempSymb, 100, ftempRead2);
                     if (i > 0)
                     {
                         fprintf(usersNew, "\n");
@@ -836,6 +839,12 @@ int main()
                 }
                 fclose(usersNew);
                 fclose(ftempRead2);
+            }
+            if (GetAsyncKeyState(VK_TAB) & 1)
+            {
+                system("cls");
+                Sleep(200);
+                currWindow = 5;
             }
         }
 
@@ -954,10 +963,11 @@ int main()
                 }
                 fclose(currUserFav);
                 fclose(ftemp);
-                currUser.favSize -= 1;
+
+                int tempSize = currUser.favSize - 1;
                 FILE* currUserFavNew = fopen(fname, "w");
                 FILE* ftempRead = fopen("ftemp.txt", "r");
-                for (int i = 0; i < currUser.favSize; i++)
+                for (int i = 0; i < tempSize; i++)
                 {
                     struct film temp;
                     fgets(temp.name, 100, ftempRead);
@@ -978,7 +988,6 @@ int main()
                 }
                 fclose(ftempRead);
                 fclose(currUserFavNew);
-
                 FILE* users = fopen("users.txt", "r");
                 FILE* ftemp2 = fopen("ftemp.txt", "w");
                 struct user temp;
@@ -1019,7 +1028,7 @@ int main()
                     fscanf(ftempRead2, "%d", &temp.favSize);
                     fscanf(ftempRead2, "%d", &temp.isAdmin);
                     char tempSymb[2];
-                    fgets(tempSymb, 100, ftempRead);
+                    fgets(tempSymb, 100, ftempRead2);
                     if (i > 0)
                     {
                         fprintf(usersNew, "\n");
@@ -1040,6 +1049,7 @@ int main()
                 {
                     popIndex(&libraryFav, libraryFavCurr);
                 }
+                currUser.favSize -= 1;
                 
                 if (currUser.favSize == 0)
                 {
@@ -1251,7 +1261,7 @@ int main()
                     fscanf(ftempRead2, "%d", &temp.favSize);
                     fscanf(ftempRead2, "%d", &temp.isAdmin);
                     char tempSymb[2];
-                    fgets(tempSymb, 100, ftempRead);
+                    fgets(tempSymb, 100, ftempRead2);
                     if (i > 0)
                     {
                         fprintf(usersNew, "\n");
@@ -1306,7 +1316,465 @@ int main()
         // Личный кабинет
         if (currWindow == 5)
         {
+            int choice;
+            int err;
+            FILE* users = fopen("users.txt", "r+");
+            if (users == NULL) perror("Произошла ошибка: ");
+            system("cls");
+            printf("Ваш профиль\n\n");
+            printf("Юзернейм: %s\n", currUser.login);
+            printf("Пароль: ");
+            if(showPass==0)
+            {
+                for(int i = 0; i<sizeof(currUser.pass);i++)
+                {
+                    if(currUser.pass[i]=='\0')
+                    {
+                        break;
+                    }
+                    printf("*");
+                }
+                printf("\n");
+            }
+            else
+            {
+                printf("%s\n",currUser.pass);
+            }
+            if(showCard==0)
+            {
+                printf("Номер карты: **** %lld\n\n",currUser.card%10000);
+            }
+            else
+            {
+                printf("Номер карты: %lld\n\n",currUser.card);
+            }
+            if(showPass==0)
+            {
+                printf("1) Показать пароль\n");
+            }
+            else
+            {
+                printf("1) Скрыть пароль\n");
+            }
+            if(showCard==0)
+            {
+                printf("2) Показать номер карты\n");
+            }
+            else
+            {
+                printf("2) Скрыть номер карты\n");
+            }
+            
+            printf("3) Сменить номер карты\n");
+            printf("4) Поменять имя\n");
+            printf("5) Изменить пароль\n\n");
+            printf("6) Выйти в каталог и сохранить данные\n\n");
+            printf("Выбор: ");scanf("%d",&choice);
+            
+            char passhold[21];
+            char passhold1[20];
+            char namehold[21];
+            
+            switch (choice)
+            {
+            case 1:
+            {
+                if (showPass == 0)
+                {
+                    showPass = 1;
+                }
+                else
+                {
+                    showPass = 0;
+                }
+                break;
+            }
 
+            case 2:
+            {
+                if (showCard == 0)
+                {
+                    showCard = 1;
+                }
+                else
+                {
+                    showCard = 0;
+                }
+                break;
+            }
+            
+            case 3: //смена карты
+            {
+                long long cardtemp; 
+                system("cls");
+                printf("Введите новый номер карты: ");
+                scanf("%lld",&cardtemp);
+                if(digits(cardtemp) != 16){
+                    system("cls");
+                    printf("Неверный номер карты, повторите попытку снова");
+                    Sleep(3000);
+                }
+                else
+                {
+                    printf("Введите пароль: ");scanf("%s",passhold);
+                    if(strcmp(passhold,currUser.pass) != 0)
+                    {
+                        system("cls");
+                        printf("Неверный пароль, повторите попытку снова");
+                        Sleep(3000);
+                    }
+                    else
+                    {
+                        currUser.card=cardtemp;
+                        FILE* users = fopen("users.txt", "r");
+                        FILE* ftemp = fopen("ftemp.txt", "w");
+                        struct user temp;
+                        int size = 0;
+                        while(fgets(temp.login, 100, users) != NULL)
+                        {
+                            temp.login[strcspn(temp.login, "\n")] = '\0';
+                            fgets(temp.pass, 100, users);
+                            fscanf(users, "%lld", &temp.card);
+                            fscanf(users, "%d", &temp.favSize);
+                            fscanf(users, "%d", &temp.isAdmin);
+                            char tempSymb[2];
+                            fgets(tempSymb, 100, users);
+                            size += 1;
+                            fprintf(ftemp, "%s\n", temp.login);
+                            fprintf(ftemp, "%s", temp.pass);
+                            if (strcmp(temp.login, currUser.login) != 0)
+                            {
+                                fprintf(ftemp, "%lld\n", temp.card);
+                            }
+                            else
+                            {
+                                fprintf(ftemp, "%lld\n", cardtemp);
+                            }
+                            fprintf(ftemp, "%d\n", temp.favSize);
+                            fprintf(ftemp, "%d\n", temp.isAdmin);
+                        }
+                        fclose(users);
+                        fclose(ftemp);
+                        FILE* usersNew = fopen("users.txt", "w");
+                        FILE* ftempRead = fopen("ftemp.txt", "r");
+                        for (int i = 0; i < size; i++)
+                        {
+                            struct user temp;
+                            fgets(temp.login, 100, ftempRead);
+                            fgets(temp.pass, 100, ftempRead);
+                            fscanf(ftempRead, "%lld", &temp.card);
+                            fscanf(ftempRead, "%d", &temp.favSize);
+                            fscanf(ftempRead, "%d", &temp.isAdmin);
+                            char tempSymb[2];
+                            fgets(tempSymb, 100, ftempRead);
+                            if (i > 0)
+                            {
+                                fprintf(usersNew, "\n");
+                            }
+                            fprintf(usersNew, "%s", temp.login);
+                            fprintf(usersNew, "%s", temp.pass);
+                            fprintf(usersNew, "%lld\n", temp.card);
+                            fprintf(usersNew, "%d\n", temp.favSize);
+                            fprintf(usersNew, "%d", temp.isAdmin);
+                        }
+                        fclose(usersNew);
+                        fclose(ftempRead);
+
+                        printf("\nУспешная смена карты!");
+                        Sleep(3000);
+                    }
+                }
+                break;
+            }
+            
+            case 4: //смена имени
+            {
+                system("cls");
+                char namehold[20];
+                printf("Введите новое имя: ");scanf("%s",namehold);
+                int isRightInput = 0;
+                int isWrongLog = 0;
+                int isExistLog = 0;
+                FILE* usersRead = fopen("users.txt", "r");
+                struct user temp;
+                while(fgets(temp.login, 100, usersRead) != NULL)
+                {
+                    temp.login[strcspn(temp.login, "\n")] = '\0';
+                    if (strcmp(namehold, temp.login) == 0)
+                    {
+                        fgets(temp.pass, 100, usersRead);
+                        temp.pass[strcspn(temp.pass, "\n")] = '\0';
+                        fscanf(usersRead, "%lld", &temp.card);
+                        fscanf(usersRead, "%d", &temp.favSize);
+                        fscanf(usersRead, "%d", &temp.isAdmin);
+                        isExistLog = 1;
+                        break;
+                    }
+                    fgets(temp.pass, 100, usersRead);
+                    temp.pass[strcspn(temp.pass, "\n")] = '\0';
+                    fscanf(usersRead, "%lld", &temp.card);
+                    fscanf(usersRead, "%d", &temp.favSize);
+                    fscanf(usersRead, "%d", &temp.isAdmin);
+                    char tempSymb[2];
+                    fgets(tempSymb, 100, usersRead);
+                }
+                for (int i = 0; i < strlen(namehold); i++)
+                {
+                    if ((namehold[i] < 48 || namehold[i] > 57) && (namehold[i] < 65 || namehold[i] > 90) && (namehold[i] < 97 || namehold[i] > 122))
+                    {
+                        isWrongLog = 1;
+                        break;
+                    }
+                }
+                if (strlen(namehold) < 3 || strlen(namehold) > 20 || isWrongLog == 1)
+                {
+                    system("cls");
+                    printf("Логин должен быть от 3 до 20 символов и состоять только из букв латинского алфавита и цифр\n");
+                    Sleep(3000);
+                }
+                else if (isExistLog == 1)
+                {
+                    system("cls");
+                    printf("Логин уже существует\n");
+                    Sleep(3000);
+                }
+                else
+                {
+                    isRightInput = 1;
+                }
+                
+                if (isRightInput == 1)
+                {
+                    printf("Введите пароль: ");scanf("%s",passhold);
+                    if(strcmp(passhold,currUser.pass) != 0)
+                    {
+                        system("cls");
+                        printf("Неверный пароль, повторите попытку снова");
+                        Sleep(3000);
+                    }
+                    else
+                    {
+                        FILE* users = fopen("users.txt", "r");
+                        FILE* ftemp = fopen("ftemp.txt", "w");
+                        struct user temp;
+                        int size = 0;
+                        while(fgets(temp.login, 100, users) != NULL)
+                        {
+                            temp.login[strcspn(temp.login, "\n")] = '\0';
+                            fgets(temp.pass, 100, users);
+                            fscanf(users, "%lld", &temp.card);
+                            fscanf(users, "%d", &temp.favSize);
+                            fscanf(users, "%d", &temp.isAdmin);
+                            char tempSymb[2];
+                            fgets(tempSymb, 100, users);
+                            size += 1;
+                            if (strcmp(temp.login, currUser.login) != 0)
+                            {
+                                fprintf(ftemp, "%s\n", temp.login);
+                            }
+                            else
+                            {
+                                fprintf(ftemp, "%s\n", namehold);
+                            }
+                            fprintf(ftemp, "%s", temp.pass);
+                            fprintf(ftemp, "%lld\n", temp.card);
+                            fprintf(ftemp, "%d\n", temp.favSize);
+                            fprintf(ftemp, "%d\n", temp.isAdmin);
+                        }
+                        fclose(users);
+                        fclose(ftemp);
+                        FILE* usersNew = fopen("users.txt", "w");
+                        FILE* ftempRead = fopen("ftemp.txt", "r");
+                        for (int i = 0; i < size; i++)
+                        {
+                            struct user temp;
+                            fgets(temp.login, 100, ftempRead);
+                            fgets(temp.pass, 100, ftempRead);
+                            fscanf(ftempRead, "%lld", &temp.card);
+                            fscanf(ftempRead, "%d", &temp.favSize);
+                            fscanf(ftempRead, "%d", &temp.isAdmin);
+                            char tempSymb[2];
+                            fgets(tempSymb, 100, ftempRead);
+                            if (i > 0)
+                            {
+                                fprintf(usersNew, "\n");
+                            }
+                            fprintf(usersNew, "%s", temp.login);
+                            fprintf(usersNew, "%s", temp.pass);
+                            fprintf(usersNew, "%lld\n", temp.card);
+                            fprintf(usersNew, "%d\n", temp.favSize);
+                            fprintf(usersNew, "%d", temp.isAdmin);
+                        }
+                        fclose(usersNew);
+                        fclose(ftempRead);
+                        strcpy(currUser.login, namehold);
+
+                        char fnameOld[34];
+                        strcpy(fnameOld, fname);
+                        strcpy(fname, "favourites_");
+                        strncat(fname, currUser.login, 20);
+                        strncat(fname, ".txt", 5);
+                        rename(fnameOld, fname);
+                        
+                        printf("\nУспешная смена имени!");
+                        Sleep(3000);
+                    }
+                }
+                break;
+            }
+
+            case 5: //смена пароля
+            {
+                system("cls");
+                printf("Введите старый пароль: ");scanf("%s",passhold);
+                if(strcmp(passhold,currUser.pass) != 0)
+                {
+                    system("cls");
+                    printf("Неверный старый пароль, повторите попытку снова");
+                    Sleep(3000);
+                }
+                else
+                {
+                    printf("\nВведите новый пароль (не более 20 символов): ");
+                    scanf("%s",passhold1);
+                    int isHighReg = 0, isLowReg = 0, isNum = 0, isWrongPass = 0, isRightInput = 0;;
+                    for (int i = 0; i < strlen(passhold1); i++)
+                    {
+                        if ((passhold1[i] < 48 || passhold1[i] > 57) && (passhold1[i] < 65 || passhold1[i] > 90) && (passhold1[i] < 97 || passhold1[i] > 122))
+                        {
+                            isWrongPass = 1;
+                            break;
+                        }
+                        if (passhold1[i] < 58 && passhold1[i] > 47)
+                        {
+                            isNum += 1;
+                        }
+                        if (passhold1[i] < 91 && passhold1[i] > 64)
+                        {
+                            isHighReg += 1;
+                        }
+                        if (passhold1[i] < 123 && passhold1[i] > 96)
+                        {
+                            isLowReg += 1;
+                        }
+                        if (isNum > 0 && isLowReg > 0 && isHighReg > 0 && strlen(passhold1) >= 6 && strlen(passhold1) <= 20 && isWrongPass == 0)
+                        {
+                            isRightInput = 1;
+                        }
+                    }
+                    if (isNum == 0 || isLowReg == 0 || isHighReg == 0 || strlen(passhold1) < 6 || strlen(passhold1) > 20 || isWrongPass == 1)
+                    {
+                        system("cls");
+                        printf("Пароль должен содержать от 6 до 20 символов, хотя бы одну цифру и букву верхнего и нижнего регистра латинского алфавита\n");
+                        Sleep(3000);
+                    }
+                    else
+                    {
+                        FILE* users = fopen("users.txt", "r");
+                        FILE* ftemp = fopen("ftemp.txt", "w");
+                        struct user temp;
+                        int size = 0;
+                        while(fgets(temp.login, 100, users) != NULL)
+                        {
+                            temp.login[strcspn(temp.login, "\n")] = '\0';
+                            fgets(temp.pass, 100, users);
+                            fscanf(users, "%lld", &temp.card);
+                            fscanf(users, "%d", &temp.favSize);
+                            fscanf(users, "%d", &temp.isAdmin);
+                            char tempSymb[2];
+                            fgets(tempSymb, 100, users);
+                            size += 1;
+                            fprintf(ftemp, "%s\n", temp.login);
+                            if (strcmp(temp.login, currUser.login) != 0)
+                            {
+                                fprintf(ftemp, "%s", temp.pass);
+                            }
+                            else
+                            {
+                                fprintf(ftemp, "%s\n", passhold1);
+                            }
+                            fprintf(ftemp, "%lld\n", temp.card);
+                            fprintf(ftemp, "%d\n", temp.favSize);
+                            fprintf(ftemp, "%d\n", temp.isAdmin);
+                        }
+                        fclose(users);
+                        fclose(ftemp);
+                        FILE* usersNew = fopen("users.txt", "w");
+                        FILE* ftempRead = fopen("ftemp.txt", "r");
+                        for (int i = 0; i < size; i++)
+                        {
+                            struct user temp;
+                            fgets(temp.login, 100, ftempRead);
+                            fgets(temp.pass, 100, ftempRead);
+                            fscanf(ftempRead, "%lld", &temp.card);
+                            fscanf(ftempRead, "%d", &temp.favSize);
+                            fscanf(ftempRead, "%d", &temp.isAdmin);
+                            char tempSymb[2];
+                            fgets(tempSymb, 100, ftempRead);
+                            if (i > 0)
+                            {
+                                fprintf(usersNew, "\n");
+                            }
+                            fprintf(usersNew, "%s", temp.login);
+                            fprintf(usersNew, "%s", temp.pass);
+                            fprintf(usersNew, "%lld\n", temp.card);
+                            fprintf(usersNew, "%d\n", temp.favSize);
+                            fprintf(usersNew, "%d", temp.isAdmin);
+                        }
+                        fclose(usersNew);
+                        fclose(ftempRead);
+                        strcpy(currUser.pass, passhold1);
+
+                        printf("\nУдачная смена пароля!");
+                        Sleep(3000);
+                    }
+                }
+                break;
+            }
+            case 6:
+            {
+                currWindow = 2;
+                system("cls");
+                printf("Добро пожаловать, %s ", currUser.login);
+                if (currUser.isAdmin == 1)
+                {
+                    printf("(Администратор)");
+                }
+                printf("\n\n");
+                printCards(library, libraryCurr);
+                FILE* currUserFav = fopen(fname, "r");
+                char temp[100];
+                isInFav = 0;
+                for (int i = 0; i < currUser.favSize; i++)
+                {
+                    fgets(temp, 100, currUserFav);
+                    temp[strcspn(temp, "\n")] = 0;
+                    if (strcmp(temp, current->film.name) == 0)
+                    {
+                        printf("\nУдалить из избранного\n");
+                        isInFav = 1;
+                        break;
+                    }
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                    fgets(temp, 100, currUserFav);
+                }
+                if (isInFav == 0)
+                {
+                    printf("\nДобавить в избранное\n");
+                }
+                fclose(currUserFav);
+                break;
+            }
+            default:
+            {
+                system("cls");
+                printf("Неверное значение!");
+                Sleep(500);
+                break;
+            }
+            }
         }
 
         // Добавление фильма в каталог
