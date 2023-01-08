@@ -1252,7 +1252,7 @@ int main()
             {
                 system("cls");
                 Sleep(200);
-                printf("-> Войти\n   Зарегистрироваться\n");
+                PrintBeg(0);
                 currWindow = -1;
                 libraryCurr = 0;
             }
