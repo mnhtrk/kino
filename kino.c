@@ -121,17 +121,17 @@ void PrintPodr(struct film l){
     a2 = strlen(l.country);
     a3 = strlen(l.genre);
     for (int i = 0; i < strlen(l.name); i++){
-        if ((l.name[i] == ' ') || (l.name[i] == '0') || (l.name[i] == '1') || (l.name[i] == '2') || (l.name[i] == '3') || (l.name[i] == '4') || (l.name[i] == '5') || (l.name[i] == '6') || (l.name[i] == '7') || (l.name[i] == '8') || (l.name[i] == '9')){
+        if (l.name[i] < 127 && l.name[i] > 31){
             b1+=1;
         }
     }
     for (int i = 0; i < strlen(l.country); i++){
-        if ((l.country[i] == ' ') || (l.country[i] == '0') || (l.country[i] == '1') || (l.country[i] == '2') || (l.country[i] == '3') || (l.country[i] == '4') || (l.country[i] == '5') || (l.country[i] == '6') || (l.country[i] == '7') || (l.country[i] == '8') || (l.country[i] == '9')){
+        if (l.country[i] < 127 && l.country[i] > 31){
             b2+=1;
         }
     }
     for (int i = 0; i < strlen(l.genre); i++){
-        if ((l.genre[i] == ' ') || (l.genre[i] == '0') || (l.genre[i] == '1') || (l.genre[i] == '2') || (l.genre[i] == '3') || (l.genre[i] == '4') || (l.genre[i] == '5') || (l.genre[i] == '6') || (l.genre[i] == '7') || (l.genre[i] == '8') || (l.genre[i] == '9')){
+        if (l.genre[i] < 127 && l.genre[i] > 31){
             b3+=1;
         }
     }
